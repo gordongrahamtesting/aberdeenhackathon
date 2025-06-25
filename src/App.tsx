@@ -1,12 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { cannedResponses } from './cannedResponses'; // Assuming this file exists and is correctly structured
+import { cannedResponses } from './cannedResponses'; // Reverted: Importing cannedResponses from its own file
+
 
 // Chatbot component - now designed to be embedded or pop-out
 // It now also accepts an 'onClose' prop to allow the parent to collapse it.
-function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen?: () => void; initialQuestion?: string; onClose?: () => void }) {
-  // State to store the conversation history
-  const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
+// chatHistory and setChatHistory are now passed as props
+function ChatbotComponent({
+  onChatOpen,
+  initialQuestion,
+  onClose,
+  chatHistory, // Received as prop
+  setChatHistory, // Received as prop
+}: {
+  onChatOpen?: () => void;
+  initialQuestion?: string;
+  onClose?: () => void;
+  chatHistory: { role: string; text: string }[]; // Type for chatHistory prop
+  setChatHistory: React.Dispatch<React.SetStateAction<{ role: string; text: string }[]>>; // Type for setChatHistory prop
+}) {
   // State to store the user's current input in the text field
   const [userInput, setUserInput] = useState<string>('');
   // State to manage the loading status (e.g., when waiting for API response)
@@ -21,8 +33,8 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
 
   // Effect to add a welcome message or process initial question when the component mounts or initialQuestion changes
   useEffect(() => {
+    // If an initial question is provided, always start a new conversation with it
     if (initialQuestion) {
-      // Clear history and start a new conversation with the initial question
       setChatHistory([
         { role: 'model', text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?" },
         { role: 'user', text: initialQuestion }
@@ -31,13 +43,11 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
         sendMessage(initialQuestion);
       }, 100);
       return () => clearTimeout(timer);
-    } else if (chatHistory.length === 0) {
-      // Only show welcome if no initial question and chat is truly empty
-      setChatHistory([{
-        role: 'model',
-        text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?"
-      }]);
     }
+    // IMPORTANT: Do NOT add a welcome message here if chatHistory is empty,
+    // as chatHistory is now managed by the parent (App.tsx) and will be populated
+    // with a welcome message on App mount.
+
     // Call onChatOpen if provided
     if (onChatOpen) {
       onChatOpen();
@@ -56,7 +66,8 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
 
     const newMessage = { role: 'user', text: messageContent };
     // Only add to history if it's not an initial programmatic send that's already in history
-    if (!questionToSend) { // Only clear if it's from the actual input field
+    if (!questionToSend) {
+      // If it's a new message from the input field, add it to history and clear input
       setChatHistory((prevHistory) => [...prevHistory, newMessage]);
       setUserInput(''); // Clear the input field
     }
@@ -67,10 +78,10 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
       for (const rule of cannedResponses) {
         if (rule.test(messageContent)) {
           setChatHistory((prevHistory) => {
-            // Avoid duplicate if the initial question was already added
+            // Avoid duplicate if the last entry is already this canned response
             const lastEntry = prevHistory[prevHistory.length - 1];
             if (lastEntry && lastEntry.text === rule.response && lastEntry.role === 'model') {
-              return prevHistory; // Already responded with this canned response
+              return prevHistory;
             }
             return [...prevHistory, { role: 'model', text: rule.response }];
           });
@@ -107,7 +118,9 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
 
       // API key. For this environment, leave it as an empty string.
       // The Canvas environment will inject the API key securely at runtime.
-      const apiKey = "AIzaSyCSBPYUDp56ZzZO6ucM_bKtmL9a5PvM0R4"; // Leave as empty string for Canvas environment to inject.
+      const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+
+      const apiKey = API_KEY; // Leave as empty string for Canvas environment to inject.
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
@@ -298,18 +311,16 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
 
   return (
     // Chat container wrapper, now adjusted to fit within a larger layout
-    // Removed outer centering and full-screen styles
-    <div className="flex flex-col w-full h-full bg-white rounded-3xl shadow-xl overflow-hidden">
+    <div className="flex flex-col w-full h-full bg-white rounded-xl shadow-xl overflow-hidden"> {/* Changed rounded-3xl to rounded-xl */}
 
       {/* Chat header */}
-      <div className="bg-gradient-to-r from-blue-700 to-purple-800 text-white p-4 rounded-t-3xl shadow-lg flex items-center justify-center relative z-10 flex-shrink-0">
-        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">AI Chat</h1>
-        {/* Removed the close button from here */}
+      <div className="bg-gradient-to-r from-blue-700 to-purple-800 text-white p-3 rounded-t-xl shadow-lg flex items-center justify-center relative z-10 flex-shrink-0"> {/* Adjusted p-4 to p-3, rounded-t-3xl to rounded-t-xl */}
+        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Talk to Simon</h1>
+        {/* The close button was already removed based on previous request */}
       </div>
 
-      {/* Chat messages display area - This is the "responses below in a section" */}
-      {/* Removed flex-1, added max-h for dynamic growth with scroll, and rounded-b-3xl for bottom corners */}
-      <div className="p-4 space-y-3 bg-gray-50 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* Adjusted to flex-grow to take available space */}
+      {/* Chat messages display area */}
+      <div className="p-4 space-y-3 bg-gray-100 flex flex-col relative z-0 flex-grow overflow-y-auto rounded-b-xl"> {/* Changed bg-gray-50 to bg-gray-100, added rounded-b-xl */}
         {chatHistory.length === 0 && !isLoading ? ( // Check if chatHistory is truly empty and not just loading
           <div className="flex-1 flex items-center justify-center text-center text-gray-500 italic text-base p-6">
             Start a conversation!
@@ -321,10 +332,10 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] p-3 rounded-2xl shadow-sm transition-all duration-300 ease-out whitespace-pre-line text-sm
+                className={`max-w-[80%] p-3 rounded-xl shadow-sm transition-all duration-300 ease-out whitespace-pre-line text-sm
                   ${msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-sm'
-                    : 'bg-gray-100 text-gray-900 rounded-bl-sm border border-gray-200'
+                    ? 'bg-blue-600 text-white rounded-br-sm' // Rounded-xl and rounded-br-sm for user
+                    : 'bg-white text-gray-900 rounded-bl-sm border border-gray-200' // Rounded-xl, rounded-bl-sm, bg-white for model
                   }`}
               >
                 {msg.role === 'model' ? renderMessage(msg) : msg.text}
@@ -344,11 +355,11 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area - Now at the bottom */}
-      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 p-4 bg-blue-800 rounded-b-3xl shadow-lg border-t border-blue-700 items-center justify-center">
+      {/* Input area */}
+      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 p-3 bg-blue-800 rounded-b-xl shadow-lg border-t border-blue-700 items-center justify-center"> {/* Adjusted p-4 to p-3, rounded-b-3xl to rounded-b-xl */}
         <input
           type="text"
-          className="flex-1 w-full p-3 border border-blue-600 bg-blue-700 text-white rounded-2xl focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition duration-200 ease-in-out text-base placeholder-blue-200"
+          className="flex-1 w-full p-2 border border-blue-600 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition duration-200 ease-in-out text-base placeholder-gray-500"
           placeholder="Type your message..."
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
@@ -357,7 +368,7 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
         />
         <button
           onClick={() => sendMessage()}
-          className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-2xl shadow-lg hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
+          className="w-full sm:w-auto px-5 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
           disabled={isLoading}
         >
           Send
@@ -371,12 +382,30 @@ function ChatbotComponent({ onChatOpen, initialQuestion, onClose }: { onChatOpen
 function App() {
   // State for accordion visibility
   const [isAccordionChatExpanded, setIsAccordionChatExpanded] = useState(false);
+  // State to store the conversation history, now lifted to App.tsx
+  const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [initialAccordionQuestion, setInitialAccordionQuestion] = useState<string | undefined>(undefined);
 
+  // Effect to add a welcome message to chatHistory when App mounts and history is empty
+  // This ensures the welcome message is there even if the chat is not expanded initially
+  useEffect(() => {
+    if (chatHistory.length === 0) {
+      setChatHistory([{
+        role: 'model',
+        text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?"
+      }]);
+    }
+  }, []); // Empty dependency array means this runs only once on mount
+
   const handleSearchSubmit = () => {
     if (searchQuery.trim() !== '') {
+      // When searching, we clear existing chat history and start fresh with the search query
+      setChatHistory([
+        { role: 'model', text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?" },
+        { role: 'user', text: searchQuery.trim() }
+      ]);
       setInitialAccordionQuestion(searchQuery.trim()); // Set question for accordion
       setIsAccordionChatExpanded(true); // Expand accordion
       setSearchQuery(''); // Clear search query after submitting
@@ -392,22 +421,25 @@ function App() {
   // Function to toggle accordion chat
   const toggleAccordionChat = () => {
     setIsAccordionChatExpanded(prev => !prev);
-    setInitialAccordionQuestion(undefined); // Clear question when toggling
+    // When toggling, we do NOT clear initialAccordionQuestion
+    // If it's already open and being closed, we don't want to trigger a new initial question
+    // If it's being opened, it will show the existing history.
   };
-  
-  // Function to collapse accordion chat
+
+  // Function to collapse accordion chat - now just toggles expansion
   const collapseAccordionChat = () => {
     setIsAccordionChatExpanded(false);
-    setInitialAccordionQuestion(undefined); // Clear initial question when collapsing accordion
+    // We do NOT clear initialAccordionQuestion here because we want to retain history.
   };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 font-sans antialiased relative">
       {/* Header/Navbar - Now the container for the accordion chatbot */}
-      <header className="bg-gradient-to-r from-blue-900 to-purple-900 text-white p-4 shadow-lg flex flex-col relative z-20"> {/* Changed to flex-col and relative */}
-        <nav className="flex items-center justify-between w-full"> {/* Added w-full here for alignment */}
-          <h1 className="text-2xl font-bold">My Awesome App</h1>
-          <div className="flex items-center space-x-4"> {/* Wrapper for right-aligned items */}
+      {/* Added rounded-b-none to header to allow the chatbot's border radius to show when expanded */}
+      <header className="bg-gradient-to-r from-blue-900 to-purple-900 text-white p-4 shadow-lg flex flex-col relative z-20 rounded-b-none">
+        <nav className="flex items-center justify-between w-full">
+          <h1 className="text-2xl font-bold">Portal Pioneers inc</h1>
+          <div className="flex items-center space-x-4">
             <ul className="flex space-x-4">
               <li><a href="#" className="hover:text-blue-300 transition-colors">Dashboard</a></li>
               <li><a href="#" className="hover:text-blue-300 transition-colors">Services</a></li>
@@ -418,7 +450,7 @@ function App() {
             <div className="flex items-center space-x-2">
               <input
                 type="text"
-                placeholder="Ask the AI a question..."
+                placeholder="Talk to Simon..."
                 className="p-2 rounded-full bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm placeholder-gray-500 w-full sm:w-64 md:w-80"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -428,7 +460,7 @@ function App() {
                 onClick={handleSearchSubmit}
                 className="px-4 py-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors font-semibold"
               >
-                Ask AI
+                Search
               </button>
             </div>
             {/* Toggle Accordion Chat button */}
@@ -443,12 +475,17 @@ function App() {
         {/* Accordion Chatbot Section - Directly inside the header */}
         {/* The chatbot will now expand *within* the header's visual space */}
         <div
-          className={`w-full bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 ease-in-out
+          className={`w-full bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-700 ease-in-out
             ${isAccordionChatExpanded ? 'max-h-[70vh] mt-4' : 'max-h-0 mt-0 invisible'}`}
           style={{ pointerEvents: isAccordionChatExpanded ? 'auto' : 'none' }}
         >
           {isAccordionChatExpanded && (
-            <ChatbotComponent initialQuestion={initialAccordionQuestion} onClose={collapseAccordionChat} />
+            <ChatbotComponent
+              initialQuestion={initialAccordionQuestion}
+              onClose={collapseAccordionChat}
+              chatHistory={chatHistory} // Pass chatHistory prop
+              setChatHistory={setChatHistory} // Pass setChatHistory prop
+            />
           )}
         </div>
       </header>
