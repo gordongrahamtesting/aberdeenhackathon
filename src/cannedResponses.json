@@ -1,0 +1,107 @@
+[
+  {
+    "keywords": {
+      "all": ["gordon", "1234", "transaction"]
+    },
+    "response": "Thank you for reaching out, your last transaction was £1000 to ABC Inc.",
+    "description": "Keywords: 'gordon' AND '1234' AND 'transaction' (e.g., 'Hi, I am Gordon with account 1234, please send me my last transaction.')"
+  },
+  {
+    "keywords": {
+      "any": ["statement", "account history"]
+    },
+    "response": "For full account statements or transaction history, please log into your secure online portal. If you need further assistance, our account management team is available to help.",
+    "description": "Keywords: 'statement' OR 'account history' (e.g., 'Can I get my account history?')"
+  },
+  {
+    "keywords": {
+      "any": ["password", "login", "locked out"]
+    },
+    "response": "If you're experiencing login issues or need to reset your password, please visit our password recovery page [link to password recovery]. For security, this chat cannot handle password resets directly.",
+    "description": "Keywords: 'password' OR 'login' OR 'locked out' (e.g., 'I forgot my password.')"
+  },
+  {
+    "keywords": {
+      "any": ["pricing", "cost", "fees"]
+    },
+    "response": "Our pricing structures vary based on the specific B2B financial service and your business needs. For detailed pricing, please visit our 'Products & Pricing' section [link to pricing page] or contact our sales team for a personalized quote.",
+    "description": "Keywords: 'pricing' OR 'cost' OR 'fees' (e.g., 'What's the cost of your services?')"
+  },
+  {
+    "keywords": {
+      "any": ["features", "capabilities", "what does it do"]
+    },
+    "response": "Our platform offers a wide range of features designed to streamline your financial operations. Could you please specify which product or area you're interested in (e.g., payment processing, lending, FX, treasury management)?",
+    "description": "Keywords: 'features' OR 'capabilities' OR 'what does it do' (e.g., 'Tell me about your platform features.')"
+  },
+  {
+    "keywords": {
+      "any": ["payment processing", "payments solution", "transaction"]
+    },
+    "response": "Our B2B payment processing solutions enable efficient and secure handling of various transaction types, including domestic, international, and bulk payments. Key features include real-time tracking, multi-currency support, and robust fraud detection. Learn more here: [link to payment processing page].",
+    "description": "Keywords: 'payment processing' OR 'payments solution' OR 'transaction' (e.g., 'How do your payment solutions work?')"
+  },
+  {
+    "keywords": {
+      "any": ["lending", "loan", "credit"]
+    },
+    "response": "We offer tailored commercial lending solutions for businesses of all sizes, designed to support your growth and operational needs. Our offerings include [mention 1-2 common loan types, e.g., working capital loans, term loans]. Find more details: [link to lending page].",
+    "description": "Keywords: 'lending' OR 'loan' OR 'credit' (e.g., 'Do you offer business loans?')"
+  },
+  {
+    "keywords": {
+      "any": ["api", "integration", "connect systems"]
+    },
+    "response": "Our platform is designed for seamless integration with your existing financial systems through our comprehensive API documentation. You can find detailed guides, endpoints, and developer resources on our Developer Portal: [link to developer portal].",
+    "description": "Keywords: 'api' OR 'integration' OR 'connect systems' (e.g., 'How can I integrate via API?')"
+  },
+  {
+    "keywords": {
+      "any": ["support", "help", "contact us"]
+    },
+    "response": "Our support team is ready to assist you. For technical issues, please visit our Help Center [link to help center] or submit a support ticket. For urgent matters, you can call us directly at 0800-FIN-SERV.",
+    "description": "Keywords: 'support' OR 'help' OR 'contact us' (e.g., 'I need help.')"
+  },
+  {
+    "keywords": {
+      "any": ["hours", "open", "close"]
+    },
+    "response": "Our customer support team is available Monday to Friday, from 9:00 AM to 5:00 PM GMT. Our online portal and self-service resources are available 24/7.",
+    "description": "Keywords: 'hours' OR 'open' OR 'close' (e.g., 'What are your operating hours?')"
+  },
+  {
+    "keywords": {
+      "any": ["get started", "onboarding", "sign up"]
+    },
+    "response": "To get started with our B2B financial services platform, you can request a demo [link to demo request] or speak with our sales team who can guide you through the onboarding process: [sales email/phone].",
+    "description": "Keywords: 'get started' OR 'onboarding' OR 'sign up' (e.g., 'How do I sign up?')"
+  },
+  {
+    "keywords": {
+      "any": ["regulatory", "compliance", "licensing"]
+    },
+    "response": "We operate in compliance with all relevant UK financial regulations, including those set by the FCA. Detailed information regarding our regulatory adherence and security protocols can be found in our 'Legal & Compliance' section: [link to legal/compliance].",
+    "description": "Keywords: 'regulatory' OR 'compliance' OR 'licensing' (e.g., 'Are you FCA compliant?')"
+  },
+  {
+    "keywords": {
+      "any": ["psd2", "open banking"]
+    },
+    "response": "Our platform supports PSD2 and Open Banking initiatives, enabling secure and efficient data exchange and payment initiation services for our clients in the UK. You can find more details on our approach to Open Banking here: [link to Open Banking page].",
+    "description": "Keywords: 'psd2' OR 'open banking' (e.g., 'Tell me about Open Banking.')"
+  },
+  {
+    "keywords": {
+      "any": ["weather", "recipe", "sports"]
+    },
+    "response": "I'm an AI assistant focused specifically on B2B financial services. I can't help with questions outside of that domain, but I'm here for any financial platform queries you have!",
+    "description": "Keywords: 'weather' OR 'recipe' OR 'sports' (for polite refusal)"
+  },
+  {
+    "keywords": {
+      "alwaysMatch": true
+    },
+    "response": "I apologize, I'm not entirely sure how to answer that. Could you please rephrase your question or provide more details? I specialize in B2B financial services.",
+    "description": "Default fallback: Any question not covered by other rules."
+  }
+]
