@@ -93,8 +93,8 @@ function ChatbotComponent({
       // Define the initial instruction that the model should adhere to.
       // This will now be prepended to each user message.
       // ENHANCED INSTRUCTION: More detailed context for tailored responses
-      const initialInstruction = `You are an expert AI assistant specializing in B2B financial services platform solutions in the UK, with a focus on streamlining payment processing, enhancing regulatory compliance, and providing robust API integrations for corporate clients.
-      Your goal is to provide concise, accurate, and helpful information specifically related to our platform's publicly available product offerings, features, benefits, and common use cases within the UK financial sector.
+      const initialInstruction = `You are an expert AI assistant called Simon, specializing in B2B financial services platform solutions in the UK, with a focus on streamlining payment processing, enhancing regulatory compliance, and providing robust API integrations for corporate clients.
+      Your goal is to provide concise, accurate, and helpful information in a friendly manner specifically related to our platform's publicly available product offerings, features, benefits, and common use cases within the UK financial sector.
       Answer only questions relevant to this domain, including pricing structures (general understanding, not specific quotes), core features, service availability, high-level regulatory considerations (e.g., PSD2, Open Banking), and how our platform integrates with existing client systems.
       If a question is outside the scope of B2B financial services or goes into confidential/proprietary details, politely state that you cannot assist with that specific topic and suggest they contact our sales or support team for personalized assistance.\n\n`;
 
@@ -394,7 +394,7 @@ function App() {
     if (chatHistory.length === 0) {
       setChatHistory([{
         role: 'model',
-        text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?"
+        text: "Hello! I'm Simon, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?"
       }]);
     }
   }, []); // Empty dependency array means this runs only once on mount
@@ -403,7 +403,7 @@ function App() {
     if (searchQuery.trim() !== '') {
       // When searching, we clear existing chat history and start fresh with the search query
       setChatHistory([
-        { role: 'model', text: "Hello! I'm your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?" },
+        { role: 'model', text: "Hello! I'm Simon, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?" },
         { role: 'user', text: searchQuery.trim() }
       ]);
       setInitialAccordionQuestion(searchQuery.trim()); // Set question for accordion

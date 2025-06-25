@@ -97,6 +97,34 @@
     "response": "I'm an AI assistant focused specifically on B2B financial services. I can't help with questions outside of that domain, but I'm here for any financial platform queries you have!",
     "description": "Keywords: 'weather' OR 'recipe' OR 'sports' (for polite refusal)"
   },
+{
+    "keywords": {
+      "any": ["hello", "hi", "hey", "how are you", "how's it going", "what's up", "how you doing", "you doing well", "good day", "greetings"]
+    },
+    "response": "Hey there! I'm doing great, thanks for asking! I'm here and ready to help with any of your B2B financial service needs. How can I assist you today?",
+    "description": "Broad greeting: 'hello' OR 'hi' OR 'how are you' OR 'how\\'s it going' OR 'what\\'s up' OR 'how you doing' etc. (e.g., 'What's up, bot?')"
+  },
+  {
+    "keywords": {
+      "any": ["you there", "are you there", "you alive", "you listening"]
+    },
+    "response": "Yep, I'm here! Always ready to help. What can I do for you?",
+    "description": "Checking for presence: 'you there' OR 'are you there' etc. (e.g., 'Are you listening, Simon?')"
+  },
+  {
+    "keywords": {
+      "any": ["nice to meet you", "good to meet you", "pleased to meet you"]
+    },
+    "response": "Nice to meet you too! I'm Simon, your AI assistant for B2B financial services. Let me know how I can help.",
+    "description": "Initial introductions: 'nice to meet you' OR 'good to meet you' (e.g., 'Hi Simon, pleased to meet you!')"
+  },
+  {
+    "keywords": {
+      "any": ["thank you", "thanks", "cheers", "appreciate it"]
+    },
+    "response": "You're most welcome! Glad I could assist. Feel free to ask if anything else comes up!",
+    "description": "Expressing gratitude: 'thank you' OR 'thanks' OR 'cheers' (e.g., 'Thanks a lot for your help!')"
+  },
   {
     "keywords": {
       "alwaysMatch": true
