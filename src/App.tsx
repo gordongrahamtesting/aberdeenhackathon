@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { cannedResponses, CannedResponseRule } from './cannedResponses'; // Import CannedResponseRule interface
 
-// Chatbot component
+// Chatbot component (no changes, left as is)
 function ChatbotComponent({
   onChatOpen,
   initialQuestion,
@@ -482,15 +482,21 @@ function ChatbotComponent({
 function App() {
   const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
-  const [userName] = useState<string>("PortalUser1234"); // Keep PortalUser1234 for consistency with the design's "Good Evening Annie" if Annie is the bot.
+  const [userName] = useState<string>("Annie");
   const [initialChatQuestion, setInitialChatQuestion] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState('Summary');
+  const [activeLink, setActiveLink] = useState('Home');
 
-  const lastUpdatedDate = new Date().toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const navLinks = [
+    { name: 'Search', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> ) },
+    { name: 'Home', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> ) },
+    { name: 'Support', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg> ) },
+    { name: 'Documents', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> ) },
+    { name: 'Profile', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg> ) },
+    { name: 'Settings', href: '#', icon: ( <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ) },
+  ];
+
+  const lastUpdatedDate = '27th June 2025';
 
   const toggleChatPanel = () => {
     setIsChatPanelOpen(prev => !prev);
@@ -512,223 +518,251 @@ function App() {
   }, [personalizedWelcomeMessage, chatHistory.length, initialChatQuestion]);
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans bg-[#F0F2F5]">
-      {/* Sidebar */}
-      <aside className="w-24 bg-[#1A2A2A] text-gray-300 p-4 flex flex-col items-center justify-between shadow-xl">
-        <div className="flex flex-col items-center mb-8">
-          <span className="text-white text-2xl font-bold mb-4">⌘</span>
-          <span className="text-white text-sm font-semibold tracking-wider">aiPIONEERS</span>
-        </div>
-        <nav className="flex flex-col space-y-6">
-          {['Watch', 'Home', 'Support', 'Documents', 'Income', 'Settings'].map((item) => (
-            <a href="#" key={item} className="flex flex-col items-center text-gray-400 hover:text-green-400 transition-colors">
-              <div className="w-6 h-6 mb-1 bg-gray-600 rounded-full flex items-center justify-center text-xs">I</div>
-              <span className="text-xs">{item}</span>
-            </a>
-          ))}
-        </nav>
-        <div></div>
-      </aside>
+    // FIX 1: Root container is now flex-col, to stack content vertically.
+    <div className="flex flex-col h-screen font-sans bg-gray-50 text-gray-800">
+      
+      {/* FIX 2: Added a new wrapper for the sidebar and main content. */}
+      <div className="flex flex-1 overflow-hidden">
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col bg-[#F0F2F5] relative">
-        <header className="px-16 py-6 bg-white shadow-sm flex items-center justify-between">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="flex flex-col">
-              <h1 className="text-3xl font-semibold text-gray-900">Good Evening {userName}.</h1>
-              <p className="text-xl text-gray-600 mt-1">How can we help you?</p>
-            </div>
+        {/* Sidebar: Stretches vertically to match its container. */}
+        <aside className="w-64 bg-gray-50 p-6 flex-shrink-0">
+          <div className="flex items-center space-x-2 mb-10">
+            <span className="text-xl font-bold bg-gray-900 text-white rounded-md px-2 py-1">ai</span>
+            <span className="text-gray-800 text-lg font-semibold tracking-wider">PIONEERS</span>
           </div>
-        </header>
+          <div className="bg-white rounded-xl p-2">
+            <nav className="flex flex-col space-y-1">
+              {navLinks.map((link) => (
+                <a
+                  href={link.href}
+                  key={link.name}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveLink(link.name);
+                  }}
+                  className={`flex items-center space-x-4 p-2 rounded-lg font-medium transition-colors ${
+                    activeLink === link.name
+                      ? 'text-green-600'
+                      : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  {link.icon}
+                  <span>{link.name}</span>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </aside>
 
-        {/* Dashboard Content */}
-        <main className="flex-1 px-16 py-10 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-[#1A2A2A] text-white p-6 rounded-2xl shadow-xl mb-10">
-              <h2 className="text-2xl font-semibold mb-4 text-green-400">Your Portfolio</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex flex-col">
-                  <span className="text-lg text-gray-400">Portfolio value today</span>
-                  <span className="text-4xl font-bold mt-1">£500,050.00</span>
-                  <span className="text-sm text-gray-500 mt-1">Last updated {lastUpdatedDate}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg text-gray-400">Change in value</span>
-                  <span className="text-4xl font-bold mt-1">£11,000.00</span>
-                  <span className="text-sm text-gray-500 mt-1">Past 12 Months</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg text-gray-400">Return %</span>
-                  <span className="text-4xl font-bold text-green-400 mt-1">+ 4.67%</span>
-                  <span className="text-sm text-gray-500 mt-1">Past 12 Months</span>
-                </div>
+        {/* Main Scrolling Area: Handles its own vertical scrolling. */}
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          <header className="px-16 py-4 bg-gray-50">
+            <div className="max-w-7xl mx-auto w-full">
+              <div className="flex flex-col">
+                <h1 className="text-3xl font-semibold text-gray-900">Good Evening {userName}.</h1>
+                <p className="text-xl text-gray-600 mt-1">How can we help you?</p>
               </div>
             </div>
+          </header>
 
-            <div className="border-b border-gray-200 mb-6">
-              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                {['Summary', 'Investments', 'Performance', 'Insights', 'Transaction History'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`${
-                      activeTab === tab
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg focus:outline-none`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </nav>
+          {/* Page Content: Added `flex-grow` to ensure it fills the available space. */}
+          <main className="px-16 pt-10 pb-20 bg-gray-50 flex-grow">
+            <div className="max-w-[90rem] mx-auto">
+              <div className="bg-[#2E4639] text-white p-8 rounded-2xl shadow-lg mb-10">
+                  <h2 className="text-2xl font-semibold text-white mb-6">Your Portfolio</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
+                      <div className="flex flex-col">
+                        <span className="text-lg text-gray-300">Portfolio value today</span>
+                        <span className="text-4xl font-bold mt-1">£500,050.00</span>
+                        <span className="text-sm text-gray-400 mt-1">Last updated {lastUpdatedDate}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-lg text-gray-300">Change in value</span>
+                        <span className="text-4xl font-bold mt-1">£11,000.00</span>
+                        <span className="text-sm text-gray-400 mt-1">Past 12 Months</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-lg text-gray-300">Return %</span>
+                        <span className="text-4xl font-bold text-green-400 mt-1">+ 4.67%</span>
+                        <span className="text-sm text-gray-400 mt-1">Past 12 Months</span>
+                      </div>
+                  </div>
+              </div>
+
+              <div className="border-b border-gray-200 mb-6">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  {['Summary', 'Investments', 'Performance', 'Insights', 'Transaction History'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`${
+                        activeTab === tab
+                          ? 'border-green-500 text-green-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg focus:outline-none`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+
+              {activeTab === 'Summary' && (
+                <>
+                  <div className="bg-white p-8 rounded-2xl shadow-md mb-10 border border-gray-200">
+                    <h3 className="text-xl font-semibold mb-6 text-gray-900">Valuation Summary</h3>
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-white">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account number</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change in value<br />Past 12 months</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-3"></span>ISA
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£500,000.00</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£11,000.00</td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2.5 w-2.5 rounded-full bg-purple-500 mr-3"></span>Personal Portfolio
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2.5 w-2.5 rounded-full bg-pink-500 mr-3"></span>Cash Account
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£50.00</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£4.00</td>
+                        </tr>
+                        <tr className="bg-white font-bold">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" colSpan={2}>Portfolio Total</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£500,050.00</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£11,004.00</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex justify-between items-start mb-6">
+                    <h2 className="text-2xl font-semibold text-gray-900">Product Details</h2>
+                    <div className="flex items-center space-x-4">
+                      <button onClick={toggleChatPanel} className="bg-green-600 text-white px-5 py-2 rounded-full font-semibold">
+                          Need help? Ask me a question
+                      </button>
+                      <button onClick={toggleChatPanel} className="bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-colors">
+                          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <span className="h-3 w-3 rounded-full bg-green-500 mr-3"></span>
+                        <h4 className="text-lg font-semibold text-gray-900">ISA</h4>
+                      </div>
+                      <hr className="border-gray-200 mb-4"/>
+                      <div className="text-gray-700 space-y-3">
+                        <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£500,000.00</span></p>
+                        <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
+                        <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">£500.00</span></p>
+                        <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">£7,500.00</span></p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <span className="h-3 w-3 rounded-full bg-purple-500 mr-3"></span>
+                        <h4 className="text-lg font-semibold text-gray-900">Personal Portfolio</h4>
+                      </div>
+                      <hr className="border-gray-200 mb-4"/>
+                      <div className="text-gray-700 space-y-3">
+                        <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£0.00</span></p>
+                        <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
+                        <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-medium text-gray-500">none</span></p>
+                        <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-medium text-gray-500">none</span></p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-4">
+                        <span className="h-3 w-3 rounded-full bg-pink-500 mr-3"></span>
+                        <h4 className="text-lg font-semibold text-gray-900">Cash Account</h4>
+                      </div>
+                      <hr className="border-gray-200 mb-4"/>
+                      <div className="text-gray-700 space-y-3">
+                        <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£50.00</span></p>
+                        <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
+                        <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-medium text-gray-500">none</span></p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-
-            {activeTab === 'Summary' && (
-              <>
-                <div className="bg-white p-8 rounded-2xl shadow-md mb-10">
-                  <h3 className="text-xl font-semibold mb-6 text-gray-900">Valuation Summary</h3>
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account number</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change in value<br />Past 12 months</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
-                          <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></span>ISA
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£500,000.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£11,000.00</td>
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
-                          <span className="h-2.5 w-2.5 rounded-full bg-purple-500 mr-2"></span>Personal Portfolio
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£0</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£0</td>
-                      </tr>
-                      <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
-                          <span className="h-2.5 w-2.5 rounded-full bg-pink-500 mr-2"></span>Cash Account
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£50.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£4.00</td>
-                      </tr>
-                      <tr className="bg-gray-50 font-bold">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" colSpan={2}>Portfolio Total</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£500,050.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£11,004.00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Product Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                    <div className="flex items-center mb-4">
-                      <span className="h-3 w-3 rounded-full bg-green-500 mr-2"></span>
-                      <h4 className="text-lg font-semibold text-gray-900">ISA</h4>
-                    </div>
-                    <div className="text-gray-700 space-y-2">
-                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£500,00.00</span></p>
-                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">£500.00</span></p>
-                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
-                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">£7,500.00</span></p>
-                    </div>
+          </main>
+        </div>
+      </div>
+      
+      {/* FIX 3: Footer is moved here, outside the main scrolling container. */}
+      <footer className="w-full bg-[#1A2A2A] text-gray-400 py-4 px-16 text-sm flex-shrink-0">
+          <div className="max-w-7xl mx-auto flex justify-between items-start">
+              <div className="space-y-4">
+                  <h3 className="text-white font-semibold text-lg flex items-center space-x-2">
+                      <span className="text-xl font-bold bg-gray-900 text-white rounded-md px-2 py-1">ai</span>
+                      <span>PIONEERS</span>
+                  </h3>
+                  <div className="text-xs text-gray-500">
+                      <p>Copyright ©PIONEERS Group plc {new Date().getFullYear()}. All rights reserved.</p>
+                      <p>Uninvested Deposits, is registered in The World.</p>
                   </div>
-
-                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                    <div className="flex items-center mb-4">
-                      <span className="h-3 w-3 rounded-full bg-purple-500 mr-2"></span>
-                      <h4 className="text-lg font-semibold text-gray-900">Personal Portfolio</h4>
-                    </div>
-                    <div className="text-gray-700 space-y-2">
-                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£0.00</span></p>
-                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">None</span></p>
-                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
-                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">None</span></p>
-                    </div>
+              </div>
+              <div className="flex space-x-16">
+                  <div className="flex flex-col space-y-2">
+                      <a href="#" className="hover:text-green-400">Home</a>
+                      <a href="#" className="hover:text-green-400">Status tracker</a>
+                      <a href="#" className="hover:text-green-400">Support</a>
+                      <a href="#" className="hover:text-green-400">Tech Zone</a>
                   </div>
-
-                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                    <div className="flex items-center mb-4">
-                      <span className="h-3 w-3 rounded-full bg-pink-500 mr-2"></span>
-                      <h4 className="text-lg font-semibold text-gray-900">Cash Account</h4>
-                    </div>
-                    <div className="text-gray-700 space-y-2">
-                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£50.00</span></p>
-                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">£50.00</span></p>
-                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
-                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">None</span></p>
-                    </div>
+                  <div className="flex flex-col space-y-2">
+                      <a href="#" className="hover:text-green-400">Cookie policy</a>
+                      <a href="#" className="hover:text-green-400">Privacy</a>
+                      <a href="#" className="hover:text-green-400">Legal Information</a>
+                      <a href="#" className="hover:text-green-400">Accessibility</a>
+                      <a href="#" className="hover:text-green-400">Modern Slavery Statement</a>
                   </div>
-                </div>
-              </>
-            )}
+              </div>
           </div>
-          {/* "Need Help" Button (Fixed position) */}
-          <button
-            onClick={toggleChatPanel}
-            className="fixed bottom-10 right-10 bg-[#4CAF50] text-white px-6 py-3 rounded-full shadow-lg hover:bg-green-600 transition-colors duration-200 ease-in-out flex items-center space-x-2 z-40"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9.228a4.5 4.5 0 110 5.656M15.712 18.176l-1.031-.295a6.526 6.526 0 01-4.707-4.707l-.295-1.031m3.656 3.656A4.5 4.5 0 119.228 8.228M12 21a9 9 0 110-18 9 9 0 010 18z" />
-            </svg>
-            <span>Need Help? Ask me a question</span>
-          </button>
-
-        </main>
-      </div>
-
-      {/* Chatbot Side Panel - POSITIONED ABSOLUTELY */}
-      <div
-        className={`fixed right-10 bottom-28 h-2/3 bg-white shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 rounded-xl
-          ${isChatPanelOpen ? 'translate-x-0 w-[30rem]' : 'translate-x-full w-0'}`}
-      >
-        {isChatPanelOpen && (
-          <ChatbotComponent
-            initialQuestion={initialChatQuestion}
-            onClose={collapseChatPanel}
-            chatHistory={chatHistory}
-            setChatHistory={setChatHistory}
-            userName={userName}
-          />
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="absolute bottom-0 left-0 right-0 w-full bg-[#1A2A2A] text-gray-400 p-6 flex flex-col md:flex-row justify-between items-center text-sm z-10">
-        <div className="mb-4 md:mb-0 text-center md:text-left">
-          <h3 className="text-white font-semibold text-lg mb-2">⌘ aiPIONEERS</h3>
-          <p>Copyright ©PIIONEERS Group plc {new Date().getFullYear()}. All rights reserved.</p>
-          <p>Uninvested Deposits, is registered in The World.</p>
-        </div>
-        <nav className="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-8">
-          <a href="#" className="hover:text-green-400">Cookie policy</a>
-          <a href="#" className="hover:text-green-400">Privacy</a>
-          <a href="#" className="hover:text-green-400">Legal Information</a>
-          <a href="#" className="hover:text-green-400">Accessibility</a>
-          <a href="#" className="hover:text-green-400">Modern Slavery Statement</a>
-        </nav>
-        <div className="mt-4 md:mt-0 text-center md:text-right">
-          <ul className="space-y-2">
-            <li><a href="#" className="hover:text-green-400">Home</a></li>
-            <li><a href="#" className="hover:text-green-400">Status tracker</a></li>
-            <li><a href="#" className="hover:text-green-400">Support</a></li>
-            <li><a href="#" className="hover:text-green-400">Tech Zone</a></li>
-          </ul>
-        </div>
       </footer>
 
-      {/* Simple CSS for the loading dots */}
+      {/* Chatbot Side Panel (Unaffected) */}
+      <div
+          className={`fixed right-10 bottom-28 h-2/3 w-[30rem] bg-white shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 rounded-xl border border-gray-200
+          ${isChatPanelOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'}`}
+      >
+          {isChatPanelOpen && (
+          <ChatbotComponent
+              initialQuestion={initialChatQuestion}
+              onClose={collapseChatPanel}
+              chatHistory={chatHistory}
+              setChatHistory={setChatHistory}
+              userName={userName}
+          />
+          )}
+      </div>
+
+      {/* Simple CSS for the loading dots (Unaffected) */}
       <style>{`
         .dot-pulse {
           animation: dot-pulse 1s infinite;
