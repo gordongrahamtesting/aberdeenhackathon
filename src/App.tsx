@@ -68,11 +68,11 @@ function ChatbotComponent({
   // --- NEW: Define your text-only prompts with more lenient keyword sets ---
   const localHiddenPrompts: LocalCannedRule[] = [
     {
-      keywords: { any: ["investments", "performed", "6 months", "return", "growth"] },
+      keywords: { any: ["investments", "performed", "performance", "6 months", "return", "growth"] },
       response: "Your investments have shown a **+8.5% return** over the past 6 months (as of June 26, 2025). This includes a strong performance from your tech sector holdings."
     },
     {
-      keywords: { any: ["investments", "inception", "performed", "return", "since"] },
+      keywords: { any: ["investments", "inception", "performed", "performance", "return", "since"] },
       response: "Since inception (your initial investment date of January 15, 2020), your overall portfolio has achieved a **+27.3% return**."
     },
     {
