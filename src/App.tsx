@@ -482,7 +482,7 @@ function ChatbotComponent({
 function App() {
   const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
-  const [userName] = useState<string>("Annie");
+  const [userName] = useState<string>("Gordon");
   const [initialChatQuestion, setInitialChatQuestion] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState('Summary');
   const [activeLink, setActiveLink] = useState('Home');
@@ -506,7 +506,7 @@ function App() {
     setIsChatPanelOpen(false);
   };
 
-  const personalizedWelcomeMessage = `Hello! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
+  const personalizedWelcomeMessage = `Hello ${userName}. I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
 
   useEffect(() => {
     if (chatHistory.length === 0 && !initialChatQuestion) {
@@ -751,7 +751,7 @@ function App() {
 
       {/* Chatbot Side Panel (Unaffected) */}
       <div
-          className={`fixed right-10 bottom-28 h-2/3 w-[30rem] bg-white shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 rounded-xl border border-gray-200
+          className={`fixed right-10 bottom-28 h-2/3 w-[35rem] bg-white shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 rounded-xl border border-gray-200
           ${isChatPanelOpen ? 'translate-x-0 visible' : 'translate-x-full invisible'}`}
       >
           {isChatPanelOpen && (
