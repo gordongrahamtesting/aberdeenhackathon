@@ -22,7 +22,7 @@ function ChatbotComponent({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
+  const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant. How can I help you today?`;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -506,7 +506,7 @@ function App() {
     setIsChatPanelOpen(false);
   };
 
-  const personalizedWelcomeMessage = `Hello ${userName}. I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
+  const personalizedWelcomeMessage = `Hello ${userName}. I'm Annie, your expert AI assistant. How can I help you today?`;
 
   useEffect(() => {
     if (chatHistory.length === 0 && !initialChatQuestion) {
