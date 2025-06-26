@@ -53,7 +53,7 @@ function ChatbotComponent({
     if (onChatOpen) {
       onChatOpen();
     }
-  }, [initialQuestion, onChatOpen, personalizedWelcomeMessage]);
+  }, [initialQuestion, onChatOpen, personalizedWelcomeMessage, setChatHistory]);
 
 
   // Define a simple interface for local rules that only need keywords and a response
@@ -123,11 +123,6 @@ function ChatbotComponent({
         // then check if ANY of the 'any' keywords are present.
         // The condition for 'any' matching should be independent or additive.
         // For 'quite loose', we can just check if ANY keyword from EITHER array is present.
-        if (!matched && rule.keywords.any && rule.keywords.any.length > 0) {
-          matched = rule.keywords.any.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
-        }
-
-        // To make it truly "quite loose" and combine 'all' and 'any' into a single 'any' check for local prompts:
         const combinedKeywords = [...(rule.keywords.all || []), ...(rule.keywords.any || [])];
         matched = combinedKeywords.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
 
@@ -422,12 +417,13 @@ function ChatbotComponent({
     <div className="flex flex-col w-full h-full bg-white rounded-xl shadow-xl overflow-hidden border border-neutral-300"> {/* White background, subtle border */}
 
       {/* Chat header */}
-      <div className="bg-neutral-950 text-white p-3 rounded-t-xl shadow-lg flex items-center justify-center relative z-10 flex-shrink-0 border-b border-neutral-700">
+      <div className="bg-neutral-950 text-white p-3 rounded-t-xl shadow-lg flex items-center justify-center relative z-10 border-b border-neutral-700"> {/* Removed flex-shrink-0 */}
         <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Ask Annie</h1>
       </div>
 
       {/* Chat messages display area */}
-      <div className="p-4 py-20 space-y-3 bg-white text-gray-900 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* White background, dark text */}
+      {/* Reduced py-20 to p-4 to give more space for header/footer */}
+      <div className="p-4 space-y-3 bg-white text-gray-900 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* White background, dark text */}
         {chatHistory.length === 0 && !isLoading ? (
           <div className="flex-1 flex items-center justify-center text-center text-neutral-500 italic text-base p-6">
             Start a conversation!
@@ -532,14 +528,14 @@ function ChatbotComponent({
 // Main App component for the website layout
 function App() {
   // State for accordion visibility
-  const [isAccordionChatExpanded, setIsAccordionChatExpanded] = useState(false);
+  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false); // Renamed for clarity
   // State to store the conversation history, now lifted to App.tsx
   const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
   // Pseudo-login state for the user's name
   const [userName, setUserName] = useState<string>("PortalUser1234");
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [initialAccordionQuestion, setInitialAccordionQuestion] = useState<string | undefined>(undefined);
+  const [initialChatQuestion, setInitialChatQuestion] = useState<string | undefined>(undefined); // Renamed for clarity
 
   // Construct personalized welcome message based on userName
   const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
@@ -560,8 +556,8 @@ function App() {
         { role: 'model', text: personalizedWelcomeMessage },
         { role: 'user', text: searchQuery.trim() }
       ]);
-      setInitialAccordionQuestion(searchQuery.trim());
-      setIsAccordionChatExpanded(true);
+      setInitialChatQuestion(searchQuery.trim()); // Use new state
+      setIsChatPanelOpen(true); // Open the side panel
       setSearchQuery('');
     }
   };
@@ -572,163 +568,163 @@ function App() {
     }
   };
 
-  // Function to toggle accordion chat
-  const toggleAccordionChat = () => {
-    setIsAccordionChatExpanded(prev => !prev);
+  // Function to toggle chat panel
+  const toggleChatPanel = () => {
+    setIsChatPanelOpen(prev => !prev);
   };
 
-  // Function to collapse accordion chat - now just toggles expansion
-  const collapseAccordionChat = () => {
-    setIsAccordionChatExpanded(false);
+  // Function to collapse chat panel
+  const collapseChatPanel = () => {
+    setIsChatPanelOpen(false);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white font-sans antialiased relative"> {/* Overall white background */}
-      {/* Header/Navbar */}
-      <header className="bg-neutral-950 text-white p-4 shadow-lg flex flex-col relative z-20 rounded-b-none border-b border-neutral-700"> {/* Deep black */}
-        <nav className="flex items-center justify-between w-full">
-          <h1 className="text-2xl font-bold text-white">Portal Pioneers inc</h1> {/* White text */}
-          <div className="flex items-center space-x-4">
-            {/* Display logged-in user name */}
-            <span className="font-semibold text-neutral-300">Welcome, {userName}!</span> {/* Lighter grey for welcome */}
-            {/* Search Field and Button (for accordion behavior) */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                placeholder="Ask Annie..."
-                className="p-2 rounded-full bg-white text-gray-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-600 text-sm placeholder-gray-500 w-full sm:w-64 md:w-80" // Changed bg-neutral-800 to bg-white, text-white to text-gray-900, placeholder-neutral-400 to placeholder-gray-500
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleSearchKeyPress}
-              />
+    <div className="flex h-screen bg-white font-sans antialiased relative overflow-hidden">
+      {/* Main Layout Container (Header + Main Content + Sidebar) */}
+      <div className="flex flex-1 flex-col z-0">
+        {/* Header/Navbar */}
+        <header className="bg-neutral-950 text-white p-4 shadow-lg flex flex-col relative z-20 rounded-b-none border-b border-neutral-700">
+          <nav className="flex items-center justify-between w-full">
+            <h1 className="text-2xl font-bold text-white">Portal Pioneers inc</h1>
+            <div className="flex items-center space-x-4">
+              <span className="font-semibold text-neutral-300">Welcome, {userName}!</span>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Ask Annie..."
+                  className="p-2 rounded-full bg-white text-gray-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-600 text-sm placeholder-gray-500 w-full sm:w-64 md:w-80"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                />
+                <button
+                  onClick={handleSearchSubmit}
+                  className="px-4 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
+                >
+                  Search
+                </button>
+              </div>
               <button
-                onClick={handleSearchSubmit}
-                className="px-4 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
+                onClick={toggleChatPanel}
+                className="ml-4 px-6 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
               >
-                Search
+                {isChatPanelOpen ? 'Close Chat' : 'Open Chat'}
               </button>
             </div>
-            {/* Toggle Accordion Chat button */}
-            <button
-              onClick={toggleAccordionChat}
-              className="ml-4 px-6 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
-            >
-              {isAccordionChatExpanded ? 'Close Chat' : 'Open Chat'}
-            </button>
-          </div>
-        </nav>
-        {/* Accordion Chatbot Section */}
-        <div
-          className={`w-full bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-700 ease-in-out
-            ${isAccordionChatExpanded ? 'max-h-[70vh] mt-4' : 'max-h-0 mt-0 invisible'}`}
-          style={{ pointerEvents: isAccordionChatExpanded ? 'auto' : 'none' }}
-        >
-          {isAccordionChatExpanded && (
-            <ChatbotComponent
-              initialQuestion={initialAccordionQuestion}
-              onClose={collapseAccordionChat}
-              chatHistory={chatHistory} // Pass chatHistory prop
-              setChatHistory={setChatHistory} // Pass setChatHistory prop
-              userName={userName} // Pass userName prop
-            />
-          )}
+          </nav>
+        </header>
+
+        {/* Main Content Area (Sidebar + Dashboard) */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <aside className="w-64 bg-neutral-900 text-neutral-300 p-4 shadow-xl flex-shrink-0 hidden md:block border-r border-neutral-800">
+            <h2 className="text-xl font-semibold mb-4 text-white">Navigation</h2>
+            <ul className="space-y-2">
+              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Overview</a></li>
+              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Customers</a></li>
+              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Products</a></li>
+              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Support</a></li>
+            </ul>
+          </aside>
+
+          {/* Content Area for Other Information */}
+          <main className="flex-1 p-6 overflow-y-auto bg-white text-gray-900">
+            <div className="flex-1">
+              <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Financial Dashboard Overview</h2>
+
+              {/* Key Metrics Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Total Assets</h3>
+                  <p className="text-3xl font-bold text-blue-700">$5.3M</p>
+                  <p className="text-sm text-gray-600 mt-1">+12% vs last month</p>
+                </div>
+                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Monthly Revenue</h3>
+                  <p className="text-3xl font-bold text-green-700">$185K</p>
+                  <p className="text-sm text-gray-600 mt-1">+8% vs last month</p>
+                </div>
+                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Active Accounts</h3>
+                  <p className="text-3xl font-bold text-purple-700">1,245</p>
+                  <p className="text-sm text-gray-600 mt-1">+50 new accounts</p>
+                </div>
+              </div>
+
+              {/* Recent Transactions Section */}
+              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 mb-8 text-gray-800">
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Recent Transactions</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Date</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Description</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Amount</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-24</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Payment to Global Corp</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$5,000.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Completed</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-23</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Deposit from Alpha Solutions</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">+$12,500.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-22</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Service Fee</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$150.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Pending</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Market Insights Section */}
+              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Market Insights</h3>
+                <p className="leading-relaxed mb-4">
+                  The global financial market continues its volatile trend. Analysts predict a modest recovery in Q3, driven by tech sector growth and stable interest rates. However, geopolitical tensions remain a key risk factor. Companies focusing on digital transformation and robust compliance frameworks are better positioned for sustained growth.
+                </p>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Digital payment solutions seeing increased adoption.</li>
+                  <li>Emphasis on strong AML and KYC compliance.</li>
+                  <li>API-first integration strategies are becoming standard.</li>
+                </ul>
+              </div>
+            </div>
+          </main>
         </div>
-      </header>
+      </div> {/* End of Main Layout Container */}
 
-      {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-64 bg-neutral-900 text-neutral-300 p-4 shadow-xl flex-shrink-0 hidden md:block border-r border-neutral-800"> {/* Dark sidebar, lighter text */}
-          <h2 className="text-xl font-semibold mb-4 text-white">Navigation</h2>
-          <ul className="space-y-2">
-            <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Overview</a></li>
-            <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Customers</a></li>
-            <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Products</a></li>
-            <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Support</a></li>
-          </ul>
-        </aside>
-
-        {/* Content Area for Other Information */}
-        <main className="flex-1 p-6 overflow-y-auto bg-white text-gray-900"> {/* White background for main content */}
-          <div className="flex-1"> {/* Main content area */}
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Financial Dashboard Overview</h2> {/* Dark text */}
-
-            {/* Key Metrics Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800"> {/* Light grey cards */}
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Total Assets</h3>
-                <p className="text-3xl font-bold text-blue-700">$5.3M</p> {/* Retain blue for key data */}
-                <p className="text-sm text-gray-600 mt-1">+12% vs last month</p>
-              </div>
-              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Monthly Revenue</h3>
-                <p className="text-3xl font-bold text-green-700">$185K</p> {/* Retain green for positive data */}
-                <p className="text-sm text-gray-600 mt-1">+8% vs last month</p>
-              </div>
-              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">Active Accounts</h3>
-                <p className="text-3xl font-bold text-purple-700">1,245</p> {/* Retain purple */}
-                <p className="text-sm text-gray-600 mt-1">+50 new accounts</p>
-              </div>
-            </div>
-
-            {/* Recent Transactions Section */}
-            <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 mb-8 text-gray-800">
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Recent Transactions</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-300"> {/* Lighter table dividers */}
-                  <thead className="bg-gray-200"> {/* Lighter table header */}
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Date</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Description</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Amount</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200"> {/* White table body */}
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-24</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Payment to Global Corp</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$5,000.00</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Completed</span> {/* Status badges remain */}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-23</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Deposit from Alpha Solutions</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">+$12,500.00</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-22</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Service Fee</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$150.00</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Pending</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Market Insights Section */}
-            <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Market Insights</h3>
-              <p className="leading-relaxed mb-4">
-                The global financial market continues its volatile trend. Analysts predict a modest recovery in Q3, driven by tech sector growth and stable interest rates. However, geopolitical tensions remain a key risk factor. Companies focusing on digital transformation and robust compliance frameworks are better positioned for sustained growth.
-              </p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Digital payment solutions seeing increased adoption.</li>
-                <li>Emphasis on strong AML and KYC compliance.</li>
-                <li>API-first integration strategies are becoming standard.</li>
-              </ul>
-            </div>
-          </div>
-        </main>
+      {/* Chatbot Side Panel - POSITIONED ABSOLUTELY */}
+      <div
+        className={`fixed right-0 bottom-4 bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 transform rounded-br-none
+          ${isChatPanelOpen ? 'translate-x-0 w-1/3 h-[80vh]' : 'translate-x-full w-0 h-[80vh]'}`}
+      >
+        {isChatPanelOpen && (
+          <ChatbotComponent
+            initialQuestion={initialChatQuestion}
+            onClose={collapseChatPanel}
+            chatHistory={chatHistory}
+            setChatHistory={setChatHistory}
+            userName={userName}
+          />
+        )}
       </div>
 
       {/* Simple CSS for the loading dots */}
