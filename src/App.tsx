@@ -2,43 +2,33 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { cannedResponses, CannedResponseRule } from './cannedResponses'; // Import CannedResponseRule interface
 
-// Chatbot component - now designed to be embedded or pop-out
-// It now also accepts an 'onClose' prop to allow the parent to collapse it.
-// chatHistory and setChatHistory are now passed as props
+// Chatbot component
 function ChatbotComponent({
   onChatOpen,
   initialQuestion,
   onClose,
-  chatHistory, // Received as prop
-  setChatHistory, // Received as prop
-  userName // New prop for personalized greeting
+  chatHistory,
+  setChatHistory,
+  userName
 }: {
   onChatOpen?: () => void;
   initialQuestion?: string;
   onClose?: () => void;
-  chatHistory: { role: string; text: string }[]; // Type for chatHistory prop
-  setChatHistory: React.Dispatch<React.SetStateAction<{ role: string; text: string }[]>>; // Type for setChatHistory prop
-  userName: string; // Type for userName prop
+  chatHistory: { role: string; text: string }[];
+  setChatHistory: React.Dispatch<React.SetStateAction<{ role: string; text: string }[]>>;
+  userName: string;
 }) {
-  // State to store the user's current input in the text field
   const [userInput, setUserInput] = useState<string>('');
-  // State to manage the loading status (e.g., when waiting for API response)
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // Ref to automatically scroll to the bottom of the chat window
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Construct personalized welcome message
   const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
 
-
-  // Effect to scroll to the latest message whenever chatHistory updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
 
-  // Effect to add a welcome message or process initial question when the component mounts or initialQuestion changes
   useEffect(() => {
-    // If an initial question is provided, always start a new conversation with it
     if (initialQuestion) {
       setChatHistory([
         { role: 'model', text: personalizedWelcomeMessage },
@@ -49,32 +39,24 @@ function ChatbotComponent({
       }, 100);
       return () => clearTimeout(timer);
     }
-    // Call onChatOpen if provided
     if (onChatOpen) {
       onChatOpen();
     }
   }, [initialQuestion, onChatOpen, personalizedWelcomeMessage, setChatHistory]);
 
-
-  // Define a simple interface for local rules that only need keywords and a response
   interface LocalCannedRule {
     keywords: {
-      all?: string[]; // All these keywords must be present
-      any?: string[]; // At least one of these keywords must be present
+      all?: string[];
+      any?: string[];
     };
     response: string;
   }
 
-  // --- NEW: Define your text-only prompts with more lenient keyword sets ---
   const localHiddenPrompts: LocalCannedRule[] = [
-    // **Option 1: Specificity for "6 Months" - Prioritize the most direct matches**
-    // This rule should fire ONLY when "6 months" (or similar short-term phrases) is present.
     {
       keywords: { any: ["6 months", "past six months", "half year", "last six months", "recent performance", "recent", "short term return"] },
       response: "Your investments have shown a **+8.5% return** over the past 6 months (as of June 26, 2025). This includes a strong performance from your tech sector holdings."
     },
-    // **Option 2: Specificity for "Inception" - Broader, but less likely to conflict with short terms**
-    // This rule fires for general performance, especially when "inception" or similar long-term words are used.
     {
       keywords: { any: ["investments", "investment", "inception", "performed", "performance", "return", "since", "initial", "original investment", "start date", "commencement", "from start", "since day one", "total return", "overall return", "portfolio return"] },
       response: "Since inception (your initial investment date of January 15, 2020), your overall portfolio has achieved a **+27.3% return**."
@@ -88,13 +70,7 @@ function ChatbotComponent({
       response: "Yes, you can make a new subscription to your ISA. You have **£5,000** remaining of your **£20,000** allowance for the current tax year (which ends April 5, 2026). You can initiate a new subscription via the 'Investments' section of your online portal."
     }
   ];
-  // --- END NEW: Define your text-only prompts ---
 
-
-  /**
-   * Handles sending a message to the Gemini API.
-   * Updates chat history, calls the API, and processes the response.
-   */
   const sendMessage = async (questionToSend?: string) => {
     const messageContent = questionToSend || userInput.trim();
     if (messageContent === '' || isLoading) {
@@ -110,22 +86,10 @@ function ChatbotComponent({
     try {
       const lowerMessageContent = messageContent.toLowerCase();
 
-      // --- NEW: Check against local hidden prompts first using loosened keyword logic ---
       for (const rule of localHiddenPrompts) {
         let matched = false;
-
-        // Check if ANY of the 'all' keywords are present (loosened from ALL)
-        if (rule.keywords.all && rule.keywords.all.length > 0) {
-          matched = rule.keywords.all.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
-        }
-
-        // If 'all' didn't match or wasn't specified, or if any 'all' keyword was found,
-        // then check if ANY of the 'any' keywords are present.
-        // The condition for 'any' matching should be independent or additive.
-        // For 'quite loose', we can just check if ANY keyword from EITHER array is present.
         const combinedKeywords = [...(rule.keywords.all || []), ...(rule.keywords.any || [])];
         matched = combinedKeywords.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
-
 
         if (matched) {
           setChatHistory((prevHistory) => {
@@ -136,14 +100,12 @@ function ChatbotComponent({
             return [...prevHistory, { role: 'model', text: rule.response }];
           });
           setIsLoading(false);
-          return; // Stop here if a local hidden prompt matches
+          return;
         }
       }
-      // --- END NEW CHECK ---
 
-      // Original: Loop through cannedResponses (from external file)
       for (const rule of cannedResponses) {
-        if (rule.test(messageContent)) { // `rule.test` already handles its own keyword logic
+        if (rule.test(messageContent)) {
           setChatHistory((prevHistory) => {
             const lastEntry = prevHistory[prevHistory.length - 1];
             if (lastEntry && lastEntry.text === rule.response && lastEntry.role === 'model') {
@@ -209,24 +171,16 @@ function ChatbotComponent({
     }
   };
 
-  /**
-   * Handles the Enter key press in the input field.
-   */
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading) {
       sendMessage();
     }
   };
 
-  /**
-   * Handles click on a canned question prompt.
-   * Sends the canned question as a user message.
-   */
   const handleCannedQuestionClick = (question: string) => {
     sendMessage(question);
   };
 
-  // Helper to render message with code block and markdown-style formatting using react-markdown
   const renderMessage = (msg: { role: string; text: string }) => {
     const codeBlockRegex = /```([\s\S]*?)```/g;
     const parts: React.ReactNode[] = [];
@@ -247,7 +201,7 @@ function ChatbotComponent({
       parts.push(
         <pre
           key={match.index}
-          className="bg-neutral-700 text-green-100 p-3 rounded-xl overflow-x-auto text-sm my-2" // Dark grey for code block
+          className="bg-gray-100 text-gray-800 p-3 rounded-xl overflow-x-auto text-sm my-2"
         >
           {match[1]}
         </pre>
@@ -267,15 +221,14 @@ function ChatbotComponent({
     return parts;
   };
 
-  // Custom components for react-markdown to style markdown elements with Tailwind
   const markdownComponents = {
     code({node, inline, className, children, ...props}: any) {
       return !inline ? (
-        <pre className="bg-neutral-700 text-green-100 p-3 rounded-xl overflow-x-auto text-sm my-2">
+        <pre className="bg-gray-100 text-gray-900 p-3 rounded-md overflow-x-auto text-sm my-2">
           <code {...props}>{children}</code>
         </pre>
       ) : (
-        <code className="bg-neutral-200 px-1 rounded text-sm">{children}</code>
+        <code className="bg-red-100 text-red-800 px-1 rounded text-sm">{children}</code>
       );
     },
     blockquote({children, ...props}: any) {
@@ -289,7 +242,7 @@ function ChatbotComponent({
       return (
         <a
           href={href}
-          className="text-blue-600 underline break-all"
+          className="text-blue-600 hover:text-blue-800 underline break-all"
           target="_blank"
           rel="noopener noreferrer"
           {...props}
@@ -334,7 +287,7 @@ function ChatbotComponent({
       );
     },
     hr() {
-      return <hr className="my-4 border-neutral-300" />;
+      return <hr className="my-4 border-gray-200" />;
     },
     img({src, alt, ...props}: any) {
       return (
@@ -350,39 +303,33 @@ function ChatbotComponent({
     },
     h1({children, ...props}: any) {
       return (
-        <h1 className="text-2xl font-bold mt-4 mb-2" {...props}>
+        <h1 className="text-2xl font-bold mt-4 mb-2 text-gray-900" {...props}>
           {children}
         </h1>
       );
     },
     h2({children, ...props}: any) {
       return (
-        <h2 className="text-xl font-bold mt-4 mb-2" {...props}>
+        <h2 className="text-xl font-bold mt-4 mb-2 text-gray-900" {...props}>
           {children}
         </h2>
       );
     },
     h3({children, ...props}: any) {
       return (
-        <h3 className="text-lg font-bold mt-4 mb-2" {...props}>
+        <h3 className="text-lg font-bold mt-4 mb-2 text-gray-900" {...props}>
           {children}
         </h3>
       );
     }
   };
 
-  // Define the exact question strings to identify the specific prompts
-  // Note: These are now used only for filtering *displayed* prompts,
-  // not for the text-only ones handled by localHiddenPrompts.
   const isaAllowanceUsedQuery = "How much of my ISA allowance have I used this tax year?";
   const isaAllowanceRemainingQuery = "How much of my ISA allowance is remaining for the current tax year?";
   const esgFundsQuery = "Which of my funds held are ESG funds?";
   const transactionHistoryQuery = `PortalUser1234 Transaction history`;
 
-
-  // Filter canned responses into two groups for DISPLAYED prompts
   const specificAccountPrompts: CannedResponseRule[] = cannedResponses.filter(rule => {
-    // Check if rule.prompt exists and is one of the specific queries
     const isSpecificAccountPrompt = rule.prompt !== undefined && rule.prompt !== null && [
       isaAllowanceUsedQuery,
       isaAllowanceRemainingQuery,
@@ -393,7 +340,6 @@ function ChatbotComponent({
   });
 
   const generalHelpPrompts: CannedResponseRule[] = cannedResponses.filter(rule => {
-    // Exclude specific account prompts
     const isSpecificAccountPrompt = rule.prompt !== undefined && rule.prompt !== null && [
       isaAllowanceUsedQuery,
       isaAllowanceRemainingQuery,
@@ -401,31 +347,37 @@ function ChatbotComponent({
       transactionHistoryQuery
     ].includes(rule.prompt);
 
-    // Also exclude prompts that are typically not useful as clickable buttons (greetings, fallback, refusals)
-    // and rules that might not have 'any' keywords defined if that's how they are suppressed.
     const isFallbackOrGreeting = rule.keywords.alwaysMatch || (rule.keywords.any && rule.keywords.any.some(kw =>
       ["hello", "hi", "hey", "you there", "nice to meet you", "thank you", "thanks", "cheers", "appreciate it", "weather", "recipe", "sports"]
       .includes(kw.toLowerCase())
     ));
 
-    // Ensure rule.prompt exists and is not specific and not a fallback/greeting
     return rule.prompt !== null && rule.prompt !== undefined && !isSpecificAccountPrompt && !isFallbackOrGreeting;
   });
 
   return (
-    // Chat container wrapper
-    <div className="flex flex-col w-full h-full bg-white rounded-xl shadow-xl overflow-hidden border border-neutral-300"> {/* White background, subtle border */}
+    <div className="flex flex-col w-full h-full bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
 
       {/* Chat header */}
-      <div className="bg-neutral-950 text-white p-3 rounded-t-xl shadow-lg flex items-center justify-center relative z-10 border-b border-neutral-700"> {/* Removed flex-shrink-0 */}
-        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Ask Annie</h1>
+      <div className="bg-gray-50 p-3 rounded-t-xl shadow-sm flex items-center justify-between relative z-10 border-b border-gray-200">
+        <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Ask Annie</h1>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors duration-200 focus:outline-none"
+            aria-label="Close chat"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Chat messages display area */}
-      {/* Reduced py-20 to p-4 to give more space for header/footer */}
-      <div className="p-4 space-y-3 bg-white text-gray-900 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* White background, dark text */}
+      <div className="p-4 space-y-3 bg-white text-gray-800 flex flex-col relative z-0 flex-grow overflow-y-auto">
         {chatHistory.length === 0 && !isLoading ? (
-          <div className="flex-1 flex items-center justify-center text-center text-neutral-500 italic text-base p-6">
+          <div className="flex-1 flex items-center justify-center text-center text-gray-500 italic text-base p-6">
             Start a conversation!
           </div>
         ) : (
@@ -437,8 +389,8 @@ function ChatbotComponent({
               <div
                 className={`max-w-[80%] p-3 rounded-xl shadow-sm transition-all duration-300 ease-out whitespace-pre-line text-sm
                   ${msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-sm' // User message: Retain a distinguishing blue
-                    : 'bg-neutral-100 text-gray-900 rounded-bl-sm border border-neutral-200' // Annie's message: Very light grey background, dark text, subtle border
+                    ? 'bg-green-600 text-white rounded-br-none'
+                    : 'bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200'
                   }`}
               >
                 {msg.role === 'model' ? renderMessage(msg) : msg.text}
@@ -449,7 +401,7 @@ function ChatbotComponent({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="max-w-[70%] p-3 rounded-2xl shadow-sm bg-neutral-100 text-neutral-600 animate-pulse text-sm">
+            <div className="max-w-[70%] p-3 rounded-2xl shadow-sm bg-gray-100 text-gray-500 animate-pulse text-sm">
               Thinking<span className="dot-pulse">.</span><span className="dot-pulse delay-150">.</span><span className="dot-pulse delay-300">.</span>
             </div>
           </div>
@@ -458,18 +410,18 @@ function ChatbotComponent({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Sticky clickable prompts and Input area: Dark footer background */}
-      <div className="flex flex-col flex-shrink-0 bg-neutral-950 rounded-b-xl shadow-lg border-t border-neutral-700">
-        {/* Clickable prompts section: Dark grey background, subtle border */}
+      {/* Sticky clickable prompts and Input area */}
+      <div className="flex flex-col flex-shrink-0 bg-white rounded-b-xl border-t border-gray-200">
+        {/* Clickable prompts section */}
         {chatHistory.length > 0 && (
-          <div className="flex flex-col p-3 bg-neutral-800 border-b border-neutral-700">
+          <div className="flex flex-col p-3 bg-gray-50 border-b border-gray-200">
             {/* Specific Account Prompts */}
             <div className="flex flex-wrap justify-center gap-2 mb-3">
               {specificAccountPrompts.map((rule, promptIndex) => (
                 <button
                   key={`specific-prompt-${promptIndex}`}
                   onClick={() => handleCannedQuestionClick(rule.prompt!)}
-                  className="bg-blue-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
+                  className="bg-green-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-green-700 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
                 >
                   {rule.prompt}
                 </button>
@@ -478,19 +430,19 @@ function ChatbotComponent({
 
             {/* Separator */}
             {specificAccountPrompts.length > 0 && generalHelpPrompts.length > 0 && (
-              <hr className="my-2 border-neutral-700" />
+              <hr className="my-2 border-gray-200" />
             )}
 
             {/* General Help Prompts */}
             {generalHelpPrompts.length > 0 && (
               <>
-                <h3 className="text-neutral-300 text-center text-sm font-semibold mb-2 mt-2">More Ways to Help</h3>
+                <h3 className="text-gray-700 text-center text-sm font-semibold mb-2 mt-2">More Ways to Help</h3>
                 <div className="flex flex-wrap justify-center gap-2">
                   {generalHelpPrompts.map((rule, promptIndex) => (
                     <button
                       key={`general-prompt-${promptIndex}`}
                       onClick={() => handleCannedQuestionClick(rule.prompt!)}
-                      className="bg-neutral-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-neutral-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
+                      className="bg-gray-200 text-gray-800 text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-gray-300 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
                     >
                       {rule.prompt}
                     </button>
@@ -501,11 +453,11 @@ function ChatbotComponent({
           </div>
         )}
 
-        {/* Input area: Dark background for input container */}
+        {/* Input area */}
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 p-3 items-center justify-center">
           <input
             type="text"
-            className="flex-1 w-full p-2 border border-neutral-700 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-neutral-600 focus:border-neutral-500 outline-none transition duration-200 ease-in-out text-base placeholder-neutral-400" // Input field itself is white background, dark text
+            className="flex-1 w-full p-2 border border-gray-300 bg-white text-gray-900 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition duration-200 ease-in-out text-base placeholder-gray-500"
             placeholder="Type your message..."
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
@@ -514,7 +466,7 @@ function ChatbotComponent({
           />
           <button
             onClick={() => sendMessage()}
-            className="w-full sm:w-auto px-5 py-2 bg-white text-black rounded-lg shadow-lg hover:bg-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
+            className="w-full sm:w-auto px-5 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
             disabled={isLoading}
           >
             Send
@@ -525,196 +477,221 @@ function ChatbotComponent({
   );
 }
 
+
 // Main App component for the website layout
 function App() {
-  // State for accordion visibility
-  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false); // Renamed for clarity
-  // State to store the conversation history, now lifted to App.tsx
+  const [isChatPanelOpen, setIsChatPanelOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: string; text: string }[]>([]);
-  // Pseudo-login state for the user's name
-  const [userName, setUserName] = useState<string>("PortalUser1234");
+  const [userName] = useState<string>("PortalUser1234"); // Keep PortalUser1234 for consistency with the design's "Good Evening Annie" if Annie is the bot.
+  const [initialChatQuestion, setInitialChatQuestion] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState('Summary');
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [initialChatQuestion, setInitialChatQuestion] = useState<string | undefined>(undefined); // Renamed for clarity
+  const lastUpdatedDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
-  // Construct personalized welcome message based on userName
-  const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
+  const toggleChatPanel = () => {
+    setIsChatPanelOpen(prev => !prev);
+  };
 
-  // Effect to add a welcome message to chatHistory when App mounts and history is empty
+  const collapseChatPanel = () => {
+    setIsChatPanelOpen(false);
+  };
+
+  const personalizedWelcomeMessage = `Hello! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
+
   useEffect(() => {
-    if (chatHistory.length === 0) {
+    if (chatHistory.length === 0 && !initialChatQuestion) {
       setChatHistory([{
         role: 'model',
         text: personalizedWelcomeMessage
       }]);
     }
-  }, [personalizedWelcomeMessage, chatHistory.length]);
-
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim() !== '') {
-      setChatHistory([
-        { role: 'model', text: personalizedWelcomeMessage },
-        { role: 'user', text: searchQuery.trim() }
-      ]);
-      setInitialChatQuestion(searchQuery.trim()); // Use new state
-      setIsChatPanelOpen(true); // Open the side panel
-      setSearchQuery('');
-    }
-  };
-
-  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit();
-    }
-  };
-
-  // Function to toggle chat panel
-  const toggleChatPanel = () => {
-    setIsChatPanelOpen(prev => !prev);
-  };
-
-  // Function to collapse chat panel
-  const collapseChatPanel = () => {
-    setIsChatPanelOpen(false);
-  };
+  }, [personalizedWelcomeMessage, chatHistory.length, initialChatQuestion]);
 
   return (
-    <div className="flex h-screen bg-white font-sans antialiased relative overflow-hidden">
-      {/* Main Layout Container (Header + Main Content + Sidebar) */}
-      <div className="flex flex-1 flex-col z-0">
-        {/* Header/Navbar */}
-        <header className="bg-neutral-950 text-white p-4 shadow-lg flex flex-col relative z-20 rounded-b-none border-b border-neutral-700">
-          <nav className="flex items-center justify-between w-full">
-            <h1 className="text-2xl font-bold text-white">Portal Pioneers inc</h1>
-            <div className="flex items-center space-x-4">
-              <span className="font-semibold text-neutral-300">Welcome, {userName}!</span>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  placeholder="Ask Annie..."
-                  className="p-2 rounded-full bg-white text-gray-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-600 text-sm placeholder-gray-500 w-full sm:w-64 md:w-80"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleSearchKeyPress}
-                />
-                <button
-                  onClick={handleSearchSubmit}
-                  className="px-4 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
-                >
-                  Search
-                </button>
-              </div>
-              <button
-                onClick={toggleChatPanel}
-                className="ml-4 px-6 py-2 bg-neutral-700 text-white rounded-full shadow-lg hover:bg-neutral-600 transition-colors font-semibold"
-              >
-                {isChatPanelOpen ? 'Close Chat' : 'Open Chat'}
-              </button>
+    <div className="flex h-screen overflow-hidden font-sans bg-[#F0F2F5]">
+      {/* Sidebar */}
+      <aside className="w-24 bg-[#1A2A2A] text-gray-300 p-4 flex flex-col items-center justify-between shadow-xl">
+        <div className="flex flex-col items-center mb-8">
+          <span className="text-white text-2xl font-bold mb-4">⌘</span>
+          <span className="text-white text-sm font-semibold tracking-wider">aiPIONEERS</span>
+        </div>
+        <nav className="flex flex-col space-y-6">
+          {['Watch', 'Home', 'Support', 'Documents', 'Income', 'Settings'].map((item) => (
+            <a href="#" key={item} className="flex flex-col items-center text-gray-400 hover:text-green-400 transition-colors">
+              <div className="w-6 h-6 mb-1 bg-gray-600 rounded-full flex items-center justify-center text-xs">I</div>
+              <span className="text-xs">{item}</span>
+            </a>
+          ))}
+        </nav>
+        <div></div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col bg-[#F0F2F5] relative">
+        <header className="px-16 py-6 bg-white shadow-sm flex items-center justify-between">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-semibold text-gray-900">Good Evening {userName}.</h1>
+              <p className="text-xl text-gray-600 mt-1">How can we help you?</p>
             </div>
-          </nav>
+          </div>
         </header>
 
-        {/* Main Content Area (Sidebar + Dashboard) */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <aside className="w-64 bg-neutral-900 text-neutral-300 p-4 shadow-xl flex-shrink-0 hidden md:block border-r border-neutral-800">
-            <h2 className="text-xl font-semibold mb-4 text-white">Navigation</h2>
-            <ul className="space-y-2">
-              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Overview</a></li>
-              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Customers</a></li>
-              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Products</a></li>
-              <li><a href="#" className="block py-2 px-3 rounded-lg hover:bg-neutral-800 transition-colors text-neutral-300">Support</a></li>
-            </ul>
-          </aside>
-
-          {/* Content Area for Other Information */}
-          <main className="flex-1 p-6 overflow-y-auto bg-white text-gray-900">
-            <div className="flex-1">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-6">Financial Dashboard Overview</h2>
-
-              {/* Key Metrics Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Total Assets</h3>
-                  <p className="text-3xl font-bold text-blue-700">$5.3M</p>
-                  <p className="text-sm text-gray-600 mt-1">+12% vs last month</p>
+        {/* Dashboard Content */}
+        <main className="flex-1 px-16 py-10 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-[#1A2A2A] text-white p-6 rounded-2xl shadow-xl mb-10">
+              <h2 className="text-2xl font-semibold mb-4 text-green-400">Your Portfolio</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex flex-col">
+                  <span className="text-lg text-gray-400">Portfolio value today</span>
+                  <span className="text-4xl font-bold mt-1">£500,050.00</span>
+                  <span className="text-sm text-gray-500 mt-1">Last updated {lastUpdatedDate}</span>
                 </div>
-                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Monthly Revenue</h3>
-                  <p className="text-3xl font-bold text-green-700">$185K</p>
-                  <p className="text-sm text-gray-600 mt-1">+8% vs last month</p>
+                <div className="flex flex-col">
+                  <span className="text-lg text-gray-400">Change in value</span>
+                  <span className="text-4xl font-bold mt-1">£11,000.00</span>
+                  <span className="text-sm text-gray-500 mt-1">Past 12 Months</span>
                 </div>
-                <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Active Accounts</h3>
-                  <p className="text-3xl font-bold text-purple-700">1,245</p>
-                  <p className="text-sm text-gray-600 mt-1">+50 new accounts</p>
+                <div className="flex flex-col">
+                  <span className="text-lg text-gray-400">Return %</span>
+                  <span className="text-4xl font-bold text-green-400 mt-1">+ 4.67%</span>
+                  <span className="text-sm text-gray-500 mt-1">Past 12 Months</span>
                 </div>
               </div>
+            </div>
 
-              {/* Recent Transactions Section */}
-              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 mb-8 text-gray-800">
-                <h3 className="text-2xl font-bold mb-4 text-gray-900">Recent Transactions</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-300">
-                    <thead className="bg-gray-200">
+            <div className="border-b border-gray-200 mb-6">
+              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                {['Summary', 'Investments', 'Performance', 'Insights', 'Transaction History'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`${
+                      activeTab === tab
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg focus:outline-none`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            {activeTab === 'Summary' && (
+              <>
+                <div className="bg-white p-8 rounded-2xl shadow-md mb-10">
+                  <h3 className="text-xl font-semibold mb-6 text-gray-900">Valuation Summary</h3>
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Date</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Description</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Amount</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account number</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change in value<br />Past 12 months</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-24</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Payment to Global Corp</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$5,000.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Completed</span>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
+                          <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2"></span>ISA
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£500,000.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£11,000.00</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-23</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Deposit from Alpha Solutions</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">+$12,500.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
+                          <span className="h-2.5 w-2.5 rounded-full bg-purple-500 mr-2"></span>Personal Portfolio
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£0</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£0</td>
                       </tr>
                       <tr>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025-06-22</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Service Fee</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">-$150.00</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Pending</span>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center">
+                          <span className="h-2.5 w-2.5 rounded-full bg-pink-500 mr-2"></span>Cash Account
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WPXXX566-004</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£50.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">£4.00</td>
+                      </tr>
+                      <tr className="bg-gray-50 font-bold">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" colSpan={2}>Portfolio Total</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£500,050.00</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£11,004.00</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-              {/* Market Insights Section */}
-              <div className="bg-gray-100 p-6 rounded-2xl shadow-lg border border-gray-200 text-gray-800">
-                <h3 className="text-2xl font-bold mb-4 text-gray-900">Market Insights</h3>
-                <p className="leading-relaxed mb-4">
-                  The global financial market continues its volatile trend. Analysts predict a modest recovery in Q3, driven by tech sector growth and stable interest rates. However, geopolitical tensions remain a key risk factor. Companies focusing on digital transformation and robust compliance frameworks are better positioned for sustained growth.
-                </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Digital payment solutions seeing increased adoption.</li>
-                  <li>Emphasis on strong AML and KYC compliance.</li>
-                  <li>API-first integration strategies are becoming standard.</li>
-                </ul>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div> {/* End of Main Layout Container */}
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">Product Details</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <span className="h-3 w-3 rounded-full bg-green-500 mr-2"></span>
+                      <h4 className="text-lg font-semibold text-gray-900">ISA</h4>
+                    </div>
+                    <div className="text-gray-700 space-y-2">
+                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£500,00.00</span></p>
+                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">£500.00</span></p>
+                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
+                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">£7,500.00</span></p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <span className="h-3 w-3 rounded-full bg-purple-500 mr-2"></span>
+                      <h4 className="text-lg font-semibold text-gray-900">Personal Portfolio</h4>
+                    </div>
+                    <div className="text-gray-700 space-y-2">
+                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£0.00</span></p>
+                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">None</span></p>
+                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
+                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">None</span></p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+                    <div className="flex items-center mb-4">
+                      <span className="h-3 w-3 rounded-full bg-pink-500 mr-2"></span>
+                      <h4 className="text-lg font-semibold text-gray-900">Cash Account</h4>
+                    </div>
+                    <div className="text-gray-700 space-y-2">
+                      <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£50.00</span></p>
+                      <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-semibold">£50.00</span></p>
+                      <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">None</span></p>
+                      <p className="flex justify-between"><span>ISA allowance remaining</span> <span className="font-semibold">None</span></p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          {/* "Need Help" Button (Fixed position) */}
+          <button
+            onClick={toggleChatPanel}
+            className="fixed bottom-10 right-10 bg-[#4CAF50] text-white px-6 py-3 rounded-full shadow-lg hover:bg-green-600 transition-colors duration-200 ease-in-out flex items-center space-x-2 z-40"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9.228a4.5 4.5 0 110 5.656M15.712 18.176l-1.031-.295a6.526 6.526 0 01-4.707-4.707l-.295-1.031m3.656 3.656A4.5 4.5 0 119.228 8.228M12 21a9 9 0 110-18 9 9 0 010 18z" />
+            </svg>
+            <span>Need Help? Ask me a question</span>
+          </button>
+
+        </main>
+      </div>
 
       {/* Chatbot Side Panel - POSITIONED ABSOLUTELY */}
       <div
-        className={`fixed right-0 bottom-4 bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 transform rounded-br-none
-          ${isChatPanelOpen ? 'translate-x-0 w-1/3 h-[80vh]' : 'translate-x-full w-0 h-[80vh]'}`}
+        className={`fixed right-10 bottom-28 h-2/3 bg-white shadow-2xl overflow-hidden transition-all duration-500 ease-in-out z-50 rounded-xl
+          ${isChatPanelOpen ? 'translate-x-0 w-[30rem]' : 'translate-x-full w-0'}`}
       >
         {isChatPanelOpen && (
           <ChatbotComponent
@@ -727,12 +704,36 @@ function App() {
         )}
       </div>
 
+      {/* Footer */}
+      <footer className="absolute bottom-0 left-0 right-0 w-full bg-[#1A2A2A] text-gray-400 p-6 flex flex-col md:flex-row justify-between items-center text-sm z-10">
+        <div className="mb-4 md:mb-0 text-center md:text-left">
+          <h3 className="text-white font-semibold text-lg mb-2">⌘ aiPIONEERS</h3>
+          <p>Copyright ©PIIONEERS Group plc {new Date().getFullYear()}. All rights reserved.</p>
+          <p>Uninvested Deposits, is registered in The World.</p>
+        </div>
+        <nav className="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-8">
+          <a href="#" className="hover:text-green-400">Cookie policy</a>
+          <a href="#" className="hover:text-green-400">Privacy</a>
+          <a href="#" className="hover:text-green-400">Legal Information</a>
+          <a href="#" className="hover:text-green-400">Accessibility</a>
+          <a href="#" className="hover:text-green-400">Modern Slavery Statement</a>
+        </nav>
+        <div className="mt-4 md:mt-0 text-center md:text-right">
+          <ul className="space-y-2">
+            <li><a href="#" className="hover:text-green-400">Home</a></li>
+            <li><a href="#" className="hover:text-green-400">Status tracker</a></li>
+            <li><a href="#" className="hover:text-green-400">Support</a></li>
+            <li><a href="#" className="hover:text-green-400">Tech Zone</a></li>
+          </ul>
+        </div>
+      </footer>
+
       {/* Simple CSS for the loading dots */}
       <style>{`
         .dot-pulse {
           animation: dot-pulse 1s infinite;
           opacity: 0;
-          display: inline-block; /* To make dots animate nicely */
+          display: inline-block;
         }
         .dot-pulse.delay-150 { animation-delay: 0.15s; }
         .dot-pulse.delay-300 { animation-delay: 0.30s; }
