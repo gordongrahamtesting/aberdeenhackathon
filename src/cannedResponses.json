@@ -1,101 +1,59 @@
 [
   {
     "keywords": {
-      "all": ["PortalUser1234", "transaction"]
+      "any": ["How much of my ISA allowance have I used this tax year?", "ISA Allowance used"]
     },
-    "response": "Here is your recent transaction history as PortalUser1234:\n\n- **2025-06-20:** Payment received - $1,500.00\n- **2025-06-15:** Invoice #20250615-001 issued - $3,200.00\n- **2025-06-10:** Refund processed - $200.00\n- **2025-06-05:** Payment sent - $750.00\n\nIs there anything else I can help you with regarding your account?",
-    "description": "Matches 'PortalUser1234 AND 'transaction'"
+    "response": "As of today, June 26, 2025, you have used **£15,000** of your **£20,000** ISA allowance for the current tax year (which runs from April 6, 2025, to April 5, 2026).",
+    "description": "ISA allowance used this tax year"
   },
   {
     "keywords": {
-      "any": ["statement", "account history"]
+      "any": ["How much of my ISA allowance is remaining for the current tax year?", "ISA Allowance remaining"]
     },
-    "response": "For full account statements or transaction history, please log into your secure online portal. If you need further assistance, our account management team is available to help.",
-    "description": "Keywords: 'statement' OR 'account history'"
+    "response": "For the current tax year (April 6, 2025, to April 5, 2026), you have **£5,000** remaining of your **£20,000** ISA allowance.",
+    "description": "Remaining ISA allowance for the current tax year"
+  },
+  {
+    "keywords": {
+      "any": ["Which of my funds held are ESG funds?"]
+    },
+    "response": "Based on your current holdings, the following funds are identified as ESG (Environmental, Social, and Governance) funds: \n\n* **Green Future Equity Fund**\n* **Sustainable Innovation Growth**\n* **Ethical Impact Bond Portfolio**\n\nThese funds consider environmental, social, and governance factors in their investment strategies.",
+    "description": "List of user's ESG funds"
   },
   {
     "keywords": {
       "any": ["password", "login", "locked out"]
     },
-    "response": "If you're experiencing login issues or need to reset your password, please visit our password recovery page [link to password recovery]. For security, this chat cannot handle password resets directly.",
+    "response": "If you're having trouble logging in or need to reset your password, please visit our dedicated **password recovery page** at [#](#). For your security, Annie can't directly handle password resets or provide account access. You'll need to go through the secure recovery process there.",
     "description": "Keywords: 'password' OR 'login' OR 'locked out'"
   },
   {
     "keywords": {
       "any": ["pricing", "cost", "fees"]
     },
-    "response": "Our pricing structures vary based on the specific B2B financial service and your business needs. For detailed pricing, please visit our 'Products & Pricing' section [link to pricing page] or contact our sales team for a personalized quote.",
+    "response": "Our pricing structures are tailored to the specific B2B financial service you need and your business's scale. For a comprehensive breakdown, please explore our **'Solutions & Pricing' section** at [#](#). For a personalized quote or to discuss enterprise solutions, feel free to contact our sales team directly at **sales@examplecorp.com**.",
     "description": "Keywords: 'pricing' OR 'cost' OR 'fees'"
   },
   {
     "keywords": {
       "any": ["features", "capabilities", "what does it do"]
     },
-    "response": "Our platform offers a wide range of features designed to streamline your financial operations. Could you please specify which product or area you're interested in (e.g., payment processing, lending, FX, treasury management)?",
+    "response": "Our platform offers a robust suite of features designed to revolutionize your financial operations. Our platform includes advanced tools for **real-time payment processing**, **dynamic liquidity management**, **cross-border FX solutions**, and **integrated treasury management**. We also provide comprehensive reporting and analytics to give you full visibility. To see these in action, you can explore our 'Platform Capabilities' section at [#](#).",
     "description": "Keywords: 'features' OR 'capabilities' OR 'what does it do'"
-  },
-  {
-    "keywords": {
-      "any": ["payment processing", "payments solution", "transaction"]
-    },
-    "response": "Our B2B payment processing solutions enable efficient and secure handling of various transaction types, including domestic, international, and bulk payments. Key features include real-time tracking, multi-currency support, and robust fraud detection. Learn more here: [link to payment processing page].",
-    "description": "Keywords: 'payment processing' OR 'payments solution' OR 'transaction'"
-  },
-  {
-    "keywords": {
-      "any": ["lending", "loan", "credit"]
-    },
-    "response": "We offer tailored commercial lending solutions for businesses of all sizes, designed to support your growth and operational needs. Our offerings include [mention 1-2 common loan types, e.g., working capital loans, term loans]. Find more details: [link to lending page].",
-    "description": "Keywords: 'lending' OR 'loan' OR 'credit'"
-  },
-  {
-    "keywords": {
-      "any": ["api", "integration", "connect systems"]
-    },
-    "response": "Our platform is designed for seamless integration with your existing financial systems through our comprehensive API documentation. You can find detailed guides, endpoints, and developer resources on our Developer Portal: [link to developer portal].",
-    "description": "Keywords: 'api' OR 'integration' OR 'connect systems'"
   },
   {
     "keywords": {
       "any": ["support", "help", "contact us"]
     },
-    "response": "Our support team is ready to assist you. For technical issues, please visit our Help Center [link to help center] or submit a support ticket. For urgent matters, you can call us directly at 0800-FIN-SERV.",
+    "response": "Our dedicated support team is always ready to assist you. For technical issues, FAQs, and detailed guides, please visit our comprehensive **Help Center** at [#](#). You can also submit a support ticket directly through the portal. For urgent matters, please call our UK support line at **0800 746 3778 (0800 FINNERS)**, available during business hours.",
     "description": "Keywords: 'support' OR 'help' OR 'contact us'"
   },
   {
     "keywords": {
       "any": ["hours", "open", "close"]
     },
-    "response": "Our customer support team is available Monday to Friday, from 9:00 AM to 5:00 PM GMT. Our online portal and self-service resources are available 24/7.",
+    "response": "Our customer support team is available **Monday to Friday, from 9:00 AM to 5:00 PM GMT**. Our online portal, self-service resources, and API access are all available 24/7 for your convenience, allowing you to manage your financial operations at any time.",
     "description": "Keywords: 'hours' OR 'open' OR 'close'"
-  },
-  {
-    "keywords": {
-      "any": ["get started", "onboarding", "sign up"]
-    },
-    "response": "To get started with our B2B financial services platform, you can request a demo [link to demo request] or speak with our sales team who can guide you through the onboarding process: [sales email/phone].",
-    "description": "Keywords: 'get started' OR 'onboarding' OR 'sign up'"
-  },
-  {
-    "keywords": {
-      "any": ["regulatory", "compliance", "licensing"]
-    },
-    "response": "We operate in compliance with all relevant UK financial regulations, including those set by the FCA. Detailed information regarding our regulatory adherence and security protocols can be found in our 'Legal & Compliance' section: [link to legal/compliance].",
-    "description": "Keywords: 'regulatory' OR 'compliance' OR 'licensing'"
-  },
-  {
-    "keywords": {
-      "any": ["psd2", "open banking"]
-    },
-    "response": "Our platform supports PSD2 and Open Banking initiatives, enabling secure and efficient data exchange and payment initiation services for our clients in the UK. You can find more details on our approach to Open Banking here: [link to Open Banking page].",
-    "description": "Keywords: 'psd2' OR 'open banking'"
-  },
-  {
-    "keywords": {
-      "any": ["weather", "recipe", "sports"]
-    },
-    "response": "I'm an AI assistant focused specifically on B2B financial services. I can't help with questions outside of that domain, but I'm here for any financial platform queries you have!",
-    "description": "Keywords: 'weather' OR 'recipe' OR 'sports' (for polite refusal)"
   },
   {
     "keywords": {

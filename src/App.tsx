@@ -29,10 +29,6 @@ function ChatbotComponent({
 
   // Construct personalized welcome message
   const personalizedWelcomeMessage = `Hello ${userName}! I'm Annie, your expert AI assistant for B2B financial services. How can I help you today with information on our platform's solutions?`;
-  // The exact question string that triggers Gordon's transaction history canned response
-  const gordonTransactionHistoryQuery = `PortalUser1234 Transaction history`;
-  // The user-friendly clickable text for Gordon's transaction history
-  const clickableGordonPrompt = `Ask about ${userName}'s Transaction history`;
 
 
   // Effect to scroll to the latest message whenever chatHistory updates
@@ -60,6 +56,37 @@ function ChatbotComponent({
   }, [initialQuestion, onChatOpen, personalizedWelcomeMessage]);
 
 
+  // Define a simple interface for local rules that only need keywords and a response
+  interface LocalCannedRule {
+    keywords: {
+      all?: string[]; // All these keywords must be present
+      any?: string[]; // At least one of these keywords must be present
+    };
+    response: string;
+  }
+
+  // --- NEW: Define your text-only prompts with more lenient keyword sets ---
+  const localHiddenPrompts: LocalCannedRule[] = [
+    {
+      keywords: { any: ["investments", "performed", "6 months", "return", "growth"] },
+      response: "Your investments have shown a **+8.5% return** over the past 6 months (as of June 26, 2025). This includes a strong performance from your tech sector holdings."
+    },
+    {
+      keywords: { any: ["investments", "inception", "performed", "return", "since"] },
+      response: "Since inception (your initial investment date of January 15, 2020), your overall portfolio has achieved a **+27.3% return**."
+    },
+    {
+      keywords: { any: ["fund", "charge", "percentage", "aggregated", "fees", "cost"] },
+      response: "Your current aggregated fund charge percentage across all your holdings is **0.75%** per annum. This includes all management fees and operational costs."
+    },
+    {
+      keywords: { any: ["subscription to isa", "subscription", "new", "top up", "pay into", "add money"] },
+      response: "Yes, you can make a new subscription to your ISA. You have **£5,000** remaining of your **£20,000** allowance for the current tax year (which ends April 5, 2026). You can initiate a new subscription via the 'Investments' section of your online portal."
+    }
+  ];
+  // --- END NEW: Define your text-only prompts ---
+
+
   /**
    * Handles sending a message to the Gemini API.
    * Updates chat history, calls the API, and processes the response.
@@ -77,8 +104,47 @@ function ChatbotComponent({
     setIsLoading(true);
 
     try {
+      const lowerMessageContent = messageContent.toLowerCase();
+
+      // --- NEW: Check against local hidden prompts first using loosened keyword logic ---
+      for (const rule of localHiddenPrompts) {
+        let matched = false;
+
+        // Check if ANY of the 'all' keywords are present (loosened from ALL)
+        if (rule.keywords.all && rule.keywords.all.length > 0) {
+          matched = rule.keywords.all.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
+        }
+
+        // If 'all' didn't match or wasn't specified, or if any 'all' keyword was found,
+        // then check if ANY of the 'any' keywords are present.
+        // The condition for 'any' matching should be independent or additive.
+        // For 'quite loose', we can just check if ANY keyword from EITHER array is present.
+        if (!matched && rule.keywords.any && rule.keywords.any.length > 0) {
+          matched = rule.keywords.any.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
+        }
+
+        // To make it truly "quite loose" and combine 'all' and 'any' into a single 'any' check for local prompts:
+        const combinedKeywords = [...(rule.keywords.all || []), ...(rule.keywords.any || [])];
+        matched = combinedKeywords.some(keyword => lowerMessageContent.includes(keyword.toLowerCase()));
+
+
+        if (matched) {
+          setChatHistory((prevHistory) => {
+            const lastEntry = prevHistory[prevHistory.length - 1];
+            if (lastEntry && lastEntry.text === rule.response && lastEntry.role === 'model') {
+              return prevHistory;
+            }
+            return [...prevHistory, { role: 'model', text: rule.response }];
+          });
+          setIsLoading(false);
+          return; // Stop here if a local hidden prompt matches
+        }
+      }
+      // --- END NEW CHECK ---
+
+      // Original: Loop through cannedResponses (from external file)
       for (const rule of cannedResponses) {
-        if (rule.test(messageContent)) {
+        if (rule.test(messageContent)) { // `rule.test` already handles its own keyword logic
           setChatHistory((prevHistory) => {
             const lastEntry = prevHistory[prevHistory.length - 1];
             if (lastEntry && lastEntry.text === rule.response && lastEntry.role === 'model') {
@@ -306,10 +372,45 @@ function ChatbotComponent({
     }
   };
 
-  // Filter canned responses to get prompts for suggestions
-  const suggestionPrompts: CannedResponseRule[] = cannedResponses.filter(rule => {
-    const isGordonTransactionRule = rule.prompt === gordonTransactionHistoryQuery;
-    return rule.prompt !== null && rule.prompt !== undefined && !isGordonTransactionRule;
+  // Define the exact question strings to identify the specific prompts
+  // Note: These are now used only for filtering *displayed* prompts,
+  // not for the text-only ones handled by localHiddenPrompts.
+  const isaAllowanceUsedQuery = "How much of my ISA allowance have I used this tax year?";
+  const isaAllowanceRemainingQuery = "How much of my ISA allowance is remaining for the current tax year?";
+  const esgFundsQuery = "Which of my funds held are ESG funds?";
+  const transactionHistoryQuery = `PortalUser1234 Transaction history`;
+
+
+  // Filter canned responses into two groups for DISPLAYED prompts
+  const specificAccountPrompts: CannedResponseRule[] = cannedResponses.filter(rule => {
+    // Check if rule.prompt exists and is one of the specific queries
+    const isSpecificAccountPrompt = rule.prompt !== undefined && rule.prompt !== null && [
+      isaAllowanceUsedQuery,
+      isaAllowanceRemainingQuery,
+      esgFundsQuery,
+      transactionHistoryQuery
+    ].includes(rule.prompt);
+    return isSpecificAccountPrompt;
+  });
+
+  const generalHelpPrompts: CannedResponseRule[] = cannedResponses.filter(rule => {
+    // Exclude specific account prompts
+    const isSpecificAccountPrompt = rule.prompt !== undefined && rule.prompt !== null && [
+      isaAllowanceUsedQuery,
+      isaAllowanceRemainingQuery,
+      esgFundsQuery,
+      transactionHistoryQuery
+    ].includes(rule.prompt);
+
+    // Also exclude prompts that are typically not useful as clickable buttons (greetings, fallback, refusals)
+    // and rules that might not have 'any' keywords defined if that's how they are suppressed.
+    const isFallbackOrGreeting = rule.keywords.alwaysMatch || (rule.keywords.any && rule.keywords.any.some(kw =>
+      ["hello", "hi", "hey", "you there", "nice to meet you", "thank you", "thanks", "cheers", "appreciate it", "weather", "recipe", "sports"]
+      .includes(kw.toLowerCase())
+    ));
+
+    // Ensure rule.prompt exists and is not specific and not a fallback/greeting
+    return rule.prompt !== null && rule.prompt !== undefined && !isSpecificAccountPrompt && !isFallbackOrGreeting;
   });
 
   return (
@@ -322,7 +423,7 @@ function ChatbotComponent({
       </div>
 
       {/* Chat messages display area */}
-      <div className="p-4 py-6 space-y-3 bg-white text-gray-900 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* White background, dark text */}
+      <div className="p-4 py-20 space-y-3 bg-white text-gray-900 flex flex-col relative z-0 flex-grow overflow-y-auto"> {/* White background, dark text */}
         {chatHistory.length === 0 && !isLoading ? (
           <div className="flex-1 flex items-center justify-center text-center text-neutral-500 italic text-base p-6">
             Start a conversation!
@@ -361,24 +462,42 @@ function ChatbotComponent({
       <div className="flex flex-col flex-shrink-0 bg-neutral-950 rounded-b-xl shadow-lg border-t border-neutral-700">
         {/* Clickable prompts section: Dark grey background, subtle border */}
         {chatHistory.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-2 p-3 bg-neutral-800 border-b border-neutral-700">
-            {/* Personalized Gordon transaction history button: Grey button, white text */}
-            <button
-              onClick={() => handleCannedQuestionClick(gordonTransactionHistoryQuery)} // Send the exact query string
-              className="bg-neutral-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-neutral-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
-            >
-              {clickableGordonPrompt}
-            </button>
-            {/* Other canned response prompts: Grey buttons, white text */}
-            {suggestionPrompts.map((rule, promptIndex) => (
-              <button
-                key={`prompt-${rule.prompt!}`}
-                onClick={() => handleCannedQuestionClick(rule.prompt!)}
-                className="bg-neutral-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-neutral-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
-              >
-                {rule.prompt}
-              </button>
-            ))}
+          <div className="flex flex-col p-3 bg-neutral-800 border-b border-neutral-700">
+            {/* Specific Account Prompts */}
+            <div className="flex flex-wrap justify-center gap-2 mb-3">
+              {specificAccountPrompts.map((rule, promptIndex) => (
+                <button
+                  key={`specific-prompt-${promptIndex}`}
+                  onClick={() => handleCannedQuestionClick(rule.prompt!)}
+                  className="bg-blue-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-blue-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
+                >
+                  {rule.prompt}
+                </button>
+              ))}
+            </div>
+
+            {/* Separator */}
+            {specificAccountPrompts.length > 0 && generalHelpPrompts.length > 0 && (
+              <hr className="my-2 border-neutral-700" />
+            )}
+
+            {/* General Help Prompts */}
+            {generalHelpPrompts.length > 0 && (
+              <>
+                <h3 className="text-neutral-300 text-center text-sm font-semibold mb-2 mt-2">More Ways to Help</h3>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {generalHelpPrompts.map((rule, promptIndex) => (
+                    <button
+                      key={`general-prompt-${promptIndex}`}
+                      onClick={() => handleCannedQuestionClick(rule.prompt!)}
+                      className="bg-neutral-700 text-white text-base font-semibold px-5 py-2 rounded-full hover:bg-neutral-600 transition-colors duration-200 ease-in-out cursor-pointer shadow-md"
+                    >
+                      {rule.prompt}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
