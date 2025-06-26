@@ -1,14 +1,14 @@
 [
   {
     "keywords": {
-      "any": ["How much of my ISA allowance have I used this tax year?", "ISA Allowance used"]
+      "any": ["How much of my ISA allowance have I used this tax year?", "ISA Allowance used", "ISA used"]
     },
     "response": "As of today, June 26, 2025, you have used **£15,000** of your **£20,000** ISA allowance for the current tax year (which runs from April 6, 2025, to April 5, 2026).",
     "description": "ISA allowance used this tax year"
   },
   {
     "keywords": {
-      "any": ["How much of my ISA allowance is remaining for the current tax year?", "ISA Allowance remaining"]
+      "any": ["How much of my ISA allowance is remaining for the current tax year?", "ISA Allowance remaining", "ISA remaining"]
     },
     "response": "For the current tax year (April 6, 2025, to April 5, 2026), you have **£5,000** remaining of your **£20,000** ISA allowance.",
     "description": "Remaining ISA allowance for the current tax year"

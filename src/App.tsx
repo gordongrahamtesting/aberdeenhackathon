@@ -67,12 +67,16 @@ function ChatbotComponent({
 
   // --- NEW: Define your text-only prompts with more lenient keyword sets ---
   const localHiddenPrompts: LocalCannedRule[] = [
+    // **Option 1: Specificity for "6 Months" - Prioritize the most direct matches**
+    // This rule should fire ONLY when "6 months" (or similar short-term phrases) is present.
     {
-      keywords: { any: ["investments", "performed", "performance", "6 months", "return", "growth"] },
+      keywords: { any: ["6 months", "past six months", "half year", "last six months", "recent performance", "recent", "short term return"] },
       response: "Your investments have shown a **+8.5% return** over the past 6 months (as of June 26, 2025). This includes a strong performance from your tech sector holdings."
     },
+    // **Option 2: Specificity for "Inception" - Broader, but less likely to conflict with short terms**
+    // This rule fires for general performance, especially when "inception" or similar long-term words are used.
     {
-      keywords: { any: ["investments", "inception", "performed", "performance", "return", "since"] },
+      keywords: { any: ["investments", "investment", "inception", "performed", "performance", "return", "since", "initial", "original investment", "start date", "commencement", "from start", "since day one", "total return", "overall return", "portfolio return"] },
       response: "Since inception (your initial investment date of January 15, 2020), your overall portfolio has achieved a **+27.3% return**."
     },
     {
