@@ -76,7 +76,7 @@ function ChatbotComponent({
       response: "Since inception (your initial investment date of January 15, 2020), your overall portfolio has achieved a **+27.3% return**."
     },
     {
-      keywords: { any: ["fund", "charge", "percentage", "aggregated", "fees", "cost"] },
+      keywords: { any: ["fund charge", "percentage", "aggregated", "fees", "cost"] },
       response: "Your current aggregated fund charge percentage across all your holdings is **0.75%** per annum. This includes all management fees and operational costs."
     },
     {

@@ -15,7 +15,7 @@
   },
   {
     "keywords": {
-      "any": ["Which of my funds held are ESG funds?"]
+      "all": ["Which of my funds held are ESG funds?"]
     },
     "response": "Based on your current holdings, the following funds are identified as ESG (Environmental, Social, and Governance) funds: \n\n* **Green Future Equity Fund**\n* **Sustainable Innovation Growth**\n* **Ethical Impact Bond Portfolio**\n\nThese funds consider environmental, social, and governance factors in their investment strategies.",
     "description": "List of user's ESG funds"
