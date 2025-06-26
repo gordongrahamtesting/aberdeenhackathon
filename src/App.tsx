@@ -518,13 +518,8 @@ function App() {
   }, [personalizedWelcomeMessage, chatHistory.length, initialChatQuestion]);
 
   return (
-    // FIX 1: Root container is now flex-col, to stack content vertically.
     <div className="flex flex-col h-screen font-sans bg-gray-50 text-gray-800">
-      
-      {/* FIX 2: Added a new wrapper for the sidebar and main content. */}
       <div className="flex flex-1 overflow-hidden">
-
-        {/* Sidebar: Stretches vertically to match its container. */}
         <aside className="w-64 bg-gray-50 p-6 flex-shrink-0">
           <div className="flex items-center space-x-2 mb-10">
             <span className="text-xl font-bold bg-gray-900 text-white rounded-md px-2 py-1">ai</span>
@@ -554,43 +549,46 @@ function App() {
           </div>
         </aside>
 
-        {/* Main Scrolling Area: Handles its own vertical scrolling. */}
         <div className="flex-1 flex flex-col overflow-y-auto">
-          <header className="px-16 py-4 bg-gray-50">
+          {/* Header padding reduced for a tighter look */}
+          <header className="px-10 py-6 bg-gray-50">
             <div className="max-w-7xl mx-auto w-full">
               <div className="flex flex-col">
-                <h1 className="text-3xl font-semibold text-gray-900">Good Evening {userName}.</h1>
-                <p className="text-xl text-gray-600 mt-1">How can we help you?</p>
+                {/* Heading size reduced */}
+                <h1 className="text-2xl font-semibold text-gray-900">Good Evening {userName}.</h1>
+                <p className="text-lg text-gray-600 mt-1">How can we help you?</p>
               </div>
             </div>
           </header>
 
-          {/* Page Content: Added `flex-grow` to ensure it fills the available space. */}
-          <main className="px-16 pt-10 pb-20 bg-gray-50 flex-grow">
+          <main className="px-10 pt-6 pb-20 bg-gray-50 flex-grow">
+            {/* max-w removed to allow content to use the space, page padding will constrain it */}
             <div className="max-w-[90rem] mx-auto">
-              <div className="bg-[#2E4639] text-white p-8 rounded-2xl shadow-lg mb-10">
-                  <h2 className="text-2xl font-semibold text-white mb-6">Your Portfolio</h2>
+              {/* Portfolio Card: Reduced padding, margins, and font sizes */}
+              <div className="bg-[#2E4639] text-white p-6 rounded-2xl shadow-lg mb-6">
+                  <h2 className="text-xl font-semibold text-white mb-4">Your Portfolio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
                       <div className="flex flex-col">
-                        <span className="text-lg text-gray-300">Portfolio value today</span>
-                        <span className="text-4xl font-bold mt-1">£500,050.00</span>
-                        <span className="text-sm text-gray-400 mt-1">Last updated {lastUpdatedDate}</span>
+                        <span className="text-base text-gray-300">Portfolio value today</span>
+                        <span className="text-3xl font-bold mt-1">£500,050.00</span>
+                        <span className="text-xs text-gray-400 mt-1">Last updated {lastUpdatedDate}</span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-lg text-gray-300">Change in value</span>
-                        <span className="text-4xl font-bold mt-1">£11,000.00</span>
+                        <span className="text-base text-gray-300">Change in value</span>
+                        <span className="text-3xl font-bold mt-1">£11,000.00</span>
                         <span className="text-sm text-gray-400 mt-1">Past 12 Months</span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-lg text-gray-300">Return %</span>
-                        <span className="text-4xl font-bold text-green-400 mt-1">+ 4.67%</span>
+                        <span className="text-base text-gray-300">Return %</span>
+                        <span className="text-3xl font-bold text-green-400 mt-1">+ 4.67%</span>
                         <span className="text-sm text-gray-400 mt-1">Past 12 Months</span>
                       </div>
                   </div>
               </div>
 
-              <div className="border-b border-gray-200 mb-6">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              {/* Tabs margin reduced */}
+              <div className="border-b border-gray-200 mb-4">
+                <nav className="-mb-px flex space-x-6" aria-label="Tabs">
                   {['Summary', 'Investments', 'Performance', 'Insights', 'Transaction History'].map((tab) => (
                     <button
                       key={tab}
@@ -599,7 +597,7 @@ function App() {
                         activeTab === tab
                           ? 'border-green-500 text-green-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg focus:outline-none`}
+                      } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-base focus:outline-none`}
                     >
                       {tab}
                     </button>
@@ -609,71 +607,77 @@ function App() {
 
               {activeTab === 'Summary' && (
                 <>
-                  <div className="bg-white p-8 rounded-2xl shadow-md mb-10 border border-gray-200">
-                    <h3 className="text-xl font-semibold mb-6 text-gray-900">Valuation Summary</h3>
+                  {/* Valuation Summary Card: Reduced padding, margins, and table cell padding */}
+                  <div className="bg-white p-6 rounded-2xl shadow-md mb-6 border border-gray-200">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900">Valuation Summary</h3>
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-white">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account number</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change in value<br />Past 12 months</th>
+                          {/* Table Header cells made more compact */}
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account number</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change in value<br />Past 12 months</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
-                            <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-3"></span>ISA
+                          {/* Table Data cells made more compact */}
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>ISA
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£500,000.00</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£11,000.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£500,000.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£11,000.00</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
-                            <span className="h-2.5 w-2.5 rounded-full bg-purple-500 mr-3"></span>Personal Portfolio
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2 w-2 rounded-full bg-purple-500 mr-2"></span>Personal Portfolio
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£0</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
-                            <span className="h-2.5 w-2.5 rounded-full bg-pink-500 mr-3"></span>Cash Account
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium flex items-center">
+                            <span className="h-2 w-2 rounded-full bg-pink-500 mr-2"></span>Cash Account
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£50.00</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">+£4.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">WP123XXX-004</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£50.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">+£4.00</td>
                         </tr>
                         <tr className="bg-white font-bold">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" colSpan={2}>Portfolio Total</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£500,050.00</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">£11,004.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900" colSpan={2}>Portfolio Total</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">£500,050.00</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">£11,004.00</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
 
-                  <div className="flex justify-between items-start mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-900">Product Details</h2>
-                    <div className="flex items-center space-x-4">
-                      <button onClick={toggleChatPanel} className="bg-green-600 text-white px-5 py-2 rounded-full font-semibold">
+                  {/* Product Details section: Reduced heading size and margin */}
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Product Details</h2>
+                    <div className="flex items-center space-x-3">
+                      <button onClick={toggleChatPanel} className="bg-green-600 text-white px-4 py-2 rounded-full font-semibold text-sm">
                           Need help? Ask me a question
                       </button>
-                      <button onClick={toggleChatPanel} className="bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-colors">
-                          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                      <button onClick={toggleChatPanel} className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors">
+                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                      <div className="flex items-center mb-4">
-                        <span className="h-3 w-3 rounded-full bg-green-500 mr-3"></span>
-                        <h4 className="text-lg font-semibold text-gray-900">ISA</h4>
+                  {/* Product cards grid: Reduced gap between cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Card: Reduced padding, heading size, and internal spacing */}
+                    <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-3">
+                        <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-3"></span>
+                        <h4 className="text-base font-semibold text-gray-900">ISA</h4>
                       </div>
-                      <hr className="border-gray-200 mb-4"/>
-                      <div className="text-gray-700 space-y-3">
+                      <hr className="border-gray-200 mb-3"/>
+                      <div className="text-sm text-gray-700 space-y-2">
                         <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£500,000.00</span></p>
                         <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
                         <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-semibold">£500.00</span></p>
@@ -681,13 +685,13 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                      <div className="flex items-center mb-4">
-                        <span className="h-3 w-3 rounded-full bg-purple-500 mr-3"></span>
-                        <h4 className="text-lg font-semibold text-gray-900">Personal Portfolio</h4>
+                    <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-3">
+                        <span className="h-2.5 w-2.5 rounded-full bg-purple-500 mr-3"></span>
+                        <h4 className="text-base font-semibold text-gray-900">Personal Portfolio</h4>
                       </div>
-                      <hr className="border-gray-200 mb-4"/>
-                      <div className="text-gray-700 space-y-3">
+                      <hr className="border-gray-200 mb-3"/>
+                      <div className="text-sm text-gray-700 space-y-2">
                         <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£0.00</span></p>
                         <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
                         <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-medium text-gray-500">none</span></p>
@@ -695,13 +699,13 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-                      <div className="flex items-center mb-4">
-                        <span className="h-3 w-3 rounded-full bg-pink-500 mr-3"></span>
-                        <h4 className="text-lg font-semibold text-gray-900">Cash Account</h4>
+                    <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-200">
+                      <div className="flex items-center mb-3">
+                        <span className="h-2.5 w-2.5 rounded-full bg-pink-500 mr-3"></span>
+                        <h4 className="text-base font-semibold text-gray-900">Cash Account</h4>
                       </div>
-                      <hr className="border-gray-200 mb-4"/>
-                      <div className="text-gray-700 space-y-3">
+                      <hr className="border-gray-200 mb-3"/>
+                      <div className="text-sm text-gray-700 space-y-2">
                         <p className="flex justify-between"><span>Value today</span> <span className="font-semibold">£50.00</span></p>
                         <p className="flex justify-between"><span>Next regular payment in</span> <span className="font-medium text-gray-500">none</span></p>
                         <p className="flex justify-between"><span>Next regular withdrawal</span> <span className="font-medium text-gray-500">none</span></p>
@@ -715,8 +719,7 @@ function App() {
         </div>
       </div>
       
-      {/* FIX 3: Footer is moved here, outside the main scrolling container. */}
-      <footer className="w-full bg-[#1A2A2A] text-gray-400 py-4 px-16 text-sm flex-shrink-0">
+      <footer className="w-full bg-[#1A2A2A] text-gray-400 py-4 px-10 text-sm flex-shrink-0">
           <div className="max-w-7xl mx-auto flex justify-between items-start">
               <div className="space-y-4">
                   <h3 className="text-white font-semibold text-lg flex items-center space-x-2">
