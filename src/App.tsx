@@ -395,7 +395,7 @@ function ChatbotComponent({
           />
           <button
             onClick={() => sendMessage()}
-            className="w-full sm:w-auto px-5 py-2 bg-blue-700 text-white rounded-lg shadow-lg hover:bg-blue-800 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
+            className="w-full sm:w-auto px-5 py-2 bg-white text-black rounded-lg shadow-lg hover:bg-white hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-75 transition duration-300 ease-in-out font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed transform"
             disabled={isLoading}
           >
             Send
